@@ -1,0 +1,14 @@
+// prisma/schema.prisma
+datasource db { provider = "postgresql"; url = env("DATABASE_URL") }
+generator client { provider = "prisma-client-js" }
+
+model Booking {
+  id          String   @id @default(cuid())
+  wallet      String
+  amount      BigInt   // จำนวนโทเคน (wei) เก็บเป็น bigint
+  status      String   // PENDING | PAID | ONCHAIN_DONE | VOUCHER_ISSUED | EXPIRED
+  txHash      String?  // ใส่ตอน mint เสร็จ
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
