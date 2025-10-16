@@ -10,7 +10,7 @@ describe("ICOToken", async function () {
         const [issuer, alice] = await viem.getWalletClients();
         const publicClient = await viem.getPublicClient();
         // deploy with correct constructor parameters
-        const icoToken = await viem.deployContract("ICOToken");
+        const icoToken = await viem.deployContract("ICOToken1");
         const amount = 10000n;
 
         // อ่านค่า role แล้ว grant ให้คนที่ต้องการ (เช่น deployer เอง)

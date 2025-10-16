@@ -5,9 +5,9 @@ import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
-contract ICOToken is ERC20, AccessControl {
+contract ICOToken1 is ERC20, AccessControl {
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
-    constructor() ERC20("ICOToken", "ICO") {
+    constructor() ERC20("ICOToken1", "ICO1") {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
     }
 
