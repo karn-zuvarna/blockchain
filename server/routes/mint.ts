@@ -1,20 +1,22 @@
-import { createWalletClient, createPublicClient, parseAbi, parseUnits, http, publicActions } from "viem";
+import { createWalletClient, createPublicClient, parseAbi, parseUnits, http } from "viem";
 import { sepolia } from "viem/chains";
 import dotenv from "dotenv";
 import { privateKeyToAccount } from "viem/accounts";
 import ICOTokenJson from "../../artifacts/contracts/ICOToken.sol/ICOToken.json" with {type: "json"};
-import { network } from "hardhat";
 
 dotenv.config();
 
 // create account from private key of metamask Account1
-const address = privateKeyToAccount(`0x${process.env.ACCOUNT1_PRIVATE_KEY as string}`);
+const address = privateKeyToAccount(`0x${process.env.ISSUER_PRIVATE_KEY as string}`);
 // const address = privateKeyToAccount(`0x${process.env.PRIVATE_KEY as string}`);
 (async () => {
+    const sepoliaUrl = process.env.SEPOLIA_INFURA_URL as string;
     // create public client
-    const publicClient = createPublicClient({ chain: sepolia, transport: http(process.env.SEPOLIA_INFURA_URL as string) });
+    const publicClient = createPublicClient({ chain: sepolia, transport: http(sepoliaUrl) });
+    console.log("public client:", publicClient);
     // create wallet client from address that created by private key
-    const walletClient = createWalletClient({ account: address, chain: sepolia, transport: http(process.env.SEPOLIA_INFURA_URL as string) });
+    const walletClient = createWalletClient({ account: address, chain: sepolia, transport: http(sepoliaUrl) });
+    console.log("wallet client:", walletClient);
 
     // get abi and bytecode from artifacts that create by command 'yarn hardhat compile'
     const abi = ICOTokenJson.abi;
@@ -35,7 +37,7 @@ const address = privateKeyToAccount(`0x${process.env.ACCOUNT1_PRIVATE_KEY as str
         console.log('❌ ไม่มีสัญญาที่ address นี้ (เป็น EOA)');
     }
     const amount = parseUnits("1000", 18);
-    const to = process.env.CLIENT_ADDRESS as `0x${string}`;
+    const to = process.env.CLIENT3_ADDRESS as `0x${string}`;
     // Simulates/validates a contract interaction. This is useful for retrieving **return data** and **revert reasons** of contract write functions.
     const { request } = await publicClient.simulateContract({
         address: tokenAddress,

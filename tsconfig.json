@@ -4,6 +4,7 @@
     "lib": [
       "es2023"
     ],
+    "types": [],
     "module": "nodenext",
     "target": "es2022",
     "strict": true,

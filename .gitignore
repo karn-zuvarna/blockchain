@@ -21,3 +21,5 @@
 
 # enviroment file
 .env
+
+/texts
