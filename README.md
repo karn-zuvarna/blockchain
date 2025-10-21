@@ -55,3 +55,67 @@ After setting the variable, you can run the deployment with the Sepolia network:
 ```shell
 npx hardhat ignition deploy --network sepolia ignition/modules/Counter.ts
 ```
+
+
+Frozen hacker: {
+  account: {
+    address: '0x90f79bf6eb2c4f870365e785982e1f101e93b906',
+    type: 'json-rpc'
+  },
+  batch: undefined,
+  cacheTime: 0,
+  ccipRead: undefined,
+  chain: {
+    formatters: undefined,
+    fees: undefined,
+    serializers: undefined,
+    id: 31337,
+    name: 'Hardhat',
+    nativeCurrency: { decimals: 18, name: 'Ether', symbol: 'ETH' },
+    rpcUrls: { default: [Object] }
+  },
+  key: 'wallet',
+  name: 'Wallet Client',
+  pollingInterval: 50,
+  request: [AsyncFunction (anonymous)],
+  transport: {
+    key: 'custom',
+    methods: undefined,
+    name: 'Custom Provider',
+    request: [Function: bound request] AsyncFunction,
+    retryCount: 0,
+    retryDelay: 150,
+    timeout: undefined,
+    type: 'custom'
+  },
+  type: 'walletClient',
+  uid: '985e6173242',
+  extend: [Function (anonymous)],
+  addChain: [Function: addChain],
+  deployContract: [Function: deployContract],
+  getAddresses: [Function: getAddresses],
+  getCallsStatus: [Function: getCallsStatus],
+  getCapabilities: [Function: getCapabilities],
+  getChainId: [Function: getChainId],
+  getPermissions: [Function: getPermissions],
+  prepareAuthorization: [Function: prepareAuthorization],
+  prepareTransactionRequest: [Function: prepareTransactionRequest],
+  requestAddresses: [Function: requestAddresses],
+  requestPermissions: [Function: requestPermissions],
+  sendCalls: [Function: sendCalls],
+  sendCallsSync: [Function: sendCallsSync],
+  sendRawTransaction: [Function: sendRawTransaction],
+  sendRawTransactionSync: [Function: sendRawTransactionSync],
+  sendTransaction: [Function: sendTransaction],
+  sendTransactionSync: [Function: sendTransactionSync],
+  showCallsStatus: [Function: showCallsStatus],
+  signAuthorization: [Function: signAuthorization],
+  signMessage: [Function: signMessage],
+  signTransaction: [Function: signTransaction],
+  signTypedData: [Function: signTypedData],
+  switchChain: [Function: switchChain],
+  waitForCallsStatus: [Function: waitForCallsStatus],
+  watchAsset: [Function: watchAsset],
+  writeContract: [Function: writeContract],
+  writeContractSync: [Function: writeContractSync]
+}
