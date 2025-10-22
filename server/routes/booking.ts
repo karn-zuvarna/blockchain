@@ -3,6 +3,7 @@ import { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { prisma } from "../libs/prisma.ts";
 import { env } from "../libs/env.ts";
+import { deploy } from "../libs/deploy.ts";
 
 export default async function routes(app: FastifyInstance) {
     const CreateBooking = z.object({
@@ -18,5 +19,10 @@ export default async function routes(app: FastifyInstance) {
             data: { wallet, amount, status: "PENDING", expiresAt },
         });
         return reply.code(201).send(rec);
+    });
+
+    app.post("/deploy", async (req, reply) => {
+        const token = await deploy();
+        return reply.code(201).send(token);
     });
 }

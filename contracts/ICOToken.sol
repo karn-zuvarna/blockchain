@@ -3,12 +3,14 @@
 pragma solidity ^0.8.24;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 
-contract ICOToken is ERC20, AccessControl {
+contract ICOToken is ERC20,ERC20Burnable, AccessControl {
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant FREEZER_ROLE = keccak256("FREEZER_ROLE");
     bytes32 public constant RECALL_ROLE = keccak256("RECALL_ROLE");
+    bytes32 public constant BURNABLE_ROLE = keccak256("BURNABLE_ROLE");
 
     mapping(address => bool) public frozen;
 
@@ -23,10 +25,18 @@ contract ICOToken is ERC20, AccessControl {
         _grantRole(MINTER_ROLE, msg.sender);
         _grantRole(FREEZER_ROLE, msg.sender);
         _grantRole(RECALL_ROLE, msg.sender);
+        _grantRole(BURNABLE_ROLE, msg.sender);
     }
 
     function mint(address to, uint256 amount) external onlyRole(MINTER_ROLE) {
         _mint(to, amount);
+    }
+
+    function burnFrom(address account, uint256 amount) public override onlyRole(BURNABLE_ROLE) {
+        uint256 currentAllowance = allowance(account, _msgSender());
+        if (currentAllowance < amount) revert("ERC20: insufficient allowance");
+        _approve(account, _msgSender(), currentAllowance - amount);
+        _burn(account, amount);
     }
 
     function transfer(address to, uint256 amount) public virtual override returns (bool) {
