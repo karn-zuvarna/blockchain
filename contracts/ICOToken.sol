@@ -51,7 +51,7 @@ contract ICOToken is ERC20, AccessControl {
     // ===== Recall (force transfer) =====
     /// @notice ย้ายโทเค็นจากบัญชีที่ถูก freeze ไปยังผู้รับปลายทาง (เช่น treasury / เจ้าของเดิม)
     /// @dev เพื่อป้องกัน misuse เราบังคับให้ from ต้องถูก freeze ก่อน
-    function recallFrozen(
+    function recall(
         address from,
         address to,
         uint256 amount

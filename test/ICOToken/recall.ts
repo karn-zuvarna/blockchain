@@ -1,4 +1,4 @@
-// test/RecallableToken.recallFrozen.test.ts
+// test/RecallableToken.recall.test.ts
 import assert from "node:assert/strict";
 import { describe, it, before } from "node:test";
 import { network } from "hardhat";
@@ -6,7 +6,7 @@ import type { Abi } from "abitype";
 import { decodeEventLog, parseEventLogs } from "viem";
 import { lens } from "viem/chains";
 
-describe("RecallableToken — recallFrozen (viem)", () => {
+describe("RecallableToken — recall (viem)", () => {
     let hviem: any;
     let owner: any, alice: any, bob: any, boss: any, hacker: any, treasury: any, outsider: any;
     let publicClient: any;
@@ -55,7 +55,7 @@ describe("RecallableToken — recallFrozen (viem)", () => {
         return icoToken;
     }
 
-    it("recallFrozen: moves tokens from FROZEN source to treasury and emits event", async () => {
+    it("recall: moves tokens from FROZEN source to treasury and emits event", async () => {
         const token = await deploy();
         // publicClient = await hviem.getPublicClient();
 
@@ -85,12 +85,12 @@ describe("RecallableToken — recallFrozen (viem)", () => {
         // Recall 250 จาก hacker -> treasury
         // const recallAmt = 250n;
         console.log("Hacker frozen:", await token.read.frozen([hacker.account.address]));
-        const hash = await token.write.recallFrozen(
+        const hash = await token.write.recall(
             [hacker.account.address, treasury.account.address, amount],
             { account: owner.account }
         );
         console.log("\n\n");
-        console.log("balances after recallFrozen:");
+        console.log("balances after recall:");
         console.log("Hacker balance after hacked alice account:", await token.read.balanceOf([hacker.account.address]));
         console.log("alice balance after recall               :", await token.read.balanceOf([alice.account.address]));
         console.log("treasury balance after recall            :", await token.read.balanceOf([treasury.account.address]));
@@ -105,7 +105,7 @@ describe("RecallableToken — recallFrozen (viem)", () => {
         assert.equal(balTreasury, amount);
     });
 
-    // it("recallFrozen: reverts if source is NOT frozen", async () => {
+    // it("recall: reverts if source is NOT frozen", async () => {
     //     const token = await deploy();
 
     //     const d: number = await token.read.decimals();
@@ -114,11 +114,11 @@ describe("RecallableToken — recallFrozen (viem)", () => {
     //     // Mint ให้ victim 100
     //     await waitTx(token.write.transfer([victim.account.address, scale(100n)], { account: owner.account }));
 
-    //     // ยังไม่ freeze -> เรียก recallFrozen ควร revert
+    //     // ยังไม่ freeze -> เรียก recall ควร revert
     //     let threw = false;
     //     try {
     //         await waitTx(
-    //             token.write.recallFrozen(
+    //             token.write.recall(
     //                 [victim.account.address, treasury.account.address, scale(10n)],
     //                 { account: owner.account }
     //             )
@@ -127,7 +127,7 @@ describe("RecallableToken — recallFrozen (viem)", () => {
     //     assert.equal(threw, true);
     // });
 
-    // it("recallFrozen: non-RECALL_ROLE cannot recall", async () => {
+    // it("recall: non-RECALL_ROLE cannot recall", async () => {
     //     const token = await deploy();
 
     //     const d: number = await token.read.decimals();
@@ -137,11 +137,11 @@ describe("RecallableToken — recallFrozen (viem)", () => {
     //     await waitTx(token.write.transfer([hacker.account.address, scale(50n)], { account: owner.account }));
     //     await waitTx(token.write.freeze([hacker.account.address], { account: owner.account }));
 
-    //     // คนที่ไม่มี RECALL_ROLE (outsider) เรียก recallFrozen -> ต้อง revert
+    //     // คนที่ไม่มี RECALL_ROLE (outsider) เรียก recall -> ต้อง revert
     //     let denied = false;
     //     try {
     //         await waitTx(
-    //             token.write.recallFrozen(
+    //             token.write.recall(
     //                 [hacker.account.address, treasury.account.address, scale(5n)],
     //                 { account: outsider.account } // ❌ ไม่ใช่ผู้มี RECALL_ROLE
     //             )
