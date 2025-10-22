@@ -1,5 +1,6 @@
 import type { HardhatUserConfig } from "hardhat/config";
-
+import "@nomicfoundation/hardhat-viem";
+// import "@nomicfoundation/hardhat-toolbox";
 import hardhatToolboxViemPlugin from "@nomicfoundation/hardhat-toolbox-viem";
 import { configVariable } from "hardhat/config";
 
