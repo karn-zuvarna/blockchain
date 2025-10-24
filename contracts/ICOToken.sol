@@ -33,10 +33,15 @@ contract ICOToken is ERC20,ERC20Burnable, AccessControl {
     }
 
     function burnFrom(address account, uint256 amount) public override onlyRole(BURNABLE_ROLE) {
-        uint256 currentAllowance = allowance(account, _msgSender());
+        uint256 currentAllowance = balanceOf(account);
         if (currentAllowance < amount) revert("ERC20: insufficient allowance");
-        _approve(account, _msgSender(), currentAllowance - amount);
+        // _approve(account, _msgSender(), currentAllowance - amount);
         _burn(account, amount);
+    }
+
+     // ✅ เผาของตัวเอง (ใครก็ได้)
+    function burn(uint256 amount) public override onlyRole(BURNABLE_ROLE) {
+        _burn(_msgSender(), amount);
     }
 
     function transfer(address to, uint256 amount) public virtual override returns (bool) {

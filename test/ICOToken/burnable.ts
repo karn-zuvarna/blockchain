@@ -30,6 +30,10 @@ describe("MyBurnableToken — burn & burnFrom (viem)", () => {
             await icoToken.write.grantRole([FREEZER_ROLE, owner.account.address], {
                 account: owner.account,
             });
+            const BURNABLE_ROLE = await icoToken.read.BURNABLE_ROLE();
+            await icoToken.write.grantRole([BURNABLE_ROLE, owner.account.address], {
+                account: owner.account,
+            });
     
             // mint ให้ alice
             const hash = await icoToken.write.mint([alice.account.address, amount], {
@@ -64,7 +68,7 @@ describe("MyBurnableToken — burn & burnFrom (viem)", () => {
     console.log("bob balance:", a0);
     
     const burnAmt = 1_000n;
-    await token.write.burn([burnAmt], { account: bob.account });
+    await token.write.burnFrom([bob.account.address,burnAmt], { account: owner.account });
     
     const ts1 = await token.read.totalSupply();
     const a1  = await token.read.balanceOf([bob.account.address]);
