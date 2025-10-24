@@ -39,11 +39,6 @@ contract ICOToken is ERC20,ERC20Burnable, AccessControl {
         _burn(account, amount);
     }
 
-     // ✅ เผาของตัวเอง (ใครก็ได้)
-    function burn(uint256 amount) public override onlyRole(BURNABLE_ROLE) {
-        _burn(_msgSender(), amount);
-    }
-
     function transfer(address to, uint256 amount) public virtual override returns (bool) {
     address owner = _msgSender();
     _transfer(owner, to, amount);
