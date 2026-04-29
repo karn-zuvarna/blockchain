@@ -1,121 +1,134 @@
-# Sample Hardhat 3 Beta Project (`node:test` and `viem`)
+# ICOToken — Hardhat 3 + viem
 
-This project showcases a Hardhat 3 Beta project using the native Node.js test runner (`node:test`) and the `viem` library for Ethereum interactions.
+ERC20 token with freeze/recall controls and a REST API for token management.
 
-To learn more about the Hardhat 3 Beta, please visit the [Getting Started guide](https://hardhat.org/docs/getting-started#getting-started-with-hardhat-3). To share your feedback, join our [Hardhat 3 Beta](https://hardhat.org/hardhat3-beta-telegram-group) Telegram group or [open an issue](https://github.com/NomicFoundation/hardhat/issues/new) in our GitHub issue tracker.
+## Prerequisites
 
-## Project Overview
+- Node.js 20+
+- Yarn
 
-This example project includes:
+## Installation
 
-- A simple Hardhat configuration file.
-- Foundry-compatible Solidity unit tests.
-- TypeScript integration tests using [`node:test`](nodejs.org/api/test.html), the new Node.js native test runner, and [`viem`](https://viem.sh/).
-- Examples demonstrating how to connect to different types of networks, including locally simulating OP mainnet.
-
-## Usage
-
-### Running Tests
-
-To run all the tests in the project, execute the following command:
-
-```shell
-npx hardhat test
+```bash
+yarn install
 ```
 
-You can also selectively run the Solidity or `node:test` tests:
+## Environment Variables
 
-```shell
-npx hardhat test solidity
-npx hardhat test nodejs
+Copy the values below into a `.env` file at the project root (or set them in your shell):
+
+| Variable | Description |
+|---|---|
+| `SEPOLIA_RPC_URL` | Sepolia RPC endpoint (e.g. from Infura or Alchemy) |
+| `SEPOLIA_PRIVATE_KEY` | Private key of the deployer account (with Sepolia ETH) |
+
+Alternatively, store secrets with the Hardhat keystore (recommended):
+
+```bash
+yarn hardhat keystore set SEPOLIA_RPC_URL
+yarn hardhat keystore set SEPOLIA_PRIVATE_KEY
 ```
 
-### Make a deployment to Sepolia
+## Compile Contracts
 
-This project includes an example Ignition module to deploy the contract. You can deploy this module to a locally simulated chain or to Sepolia.
-
-To run the deployment to a local chain:
-
-```shell
-npx hardhat ignition deploy ignition/modules/Counter.ts
+```bash
+yarn hardhat compile
 ```
 
-To run the deployment to Sepolia, you need an account with funds to send the transaction. The provided Hardhat configuration includes a Configuration Variable called `SEPOLIA_PRIVATE_KEY`, which you can use to set the private key of the account you want to use.
+Artifacts are written to `artifacts/`.
 
-You can set the `SEPOLIA_PRIVATE_KEY` variable using the `hardhat-keystore` plugin or by setting it as an environment variable.
+## Run Tests
 
-To set the `SEPOLIA_PRIVATE_KEY` config variable using `hardhat-keystore`:
+```bash
+# All tests (runs on the local EDR-simulated chain)
+yarn hardhat test
 
-```shell
-npx hardhat keystore set SEPOLIA_PRIVATE_KEY
+# Single test file
+yarn hardhat test test/ICOToken/freeze.ts
+yarn hardhat test test/ICOToken/recall.ts
+yarn hardhat test test/ICOToken/burnable.ts
+yarn hardhat test test/ICOToken.ts
 ```
 
-After setting the variable, you can run the deployment with the Sepolia network:
+Tests use the Node.js native `node:test` runner with `node:assert/strict`. No external test process is needed.
 
-```shell
-npx hardhat ignition deploy --network sepolia ignition/modules/Counter.ts
+## Deploy
+
+### Local simulated chain
+
+```bash
+yarn hardhat run scripts/deploy.ts
 ```
 
+### Sepolia testnet
 
-Frozen hacker: {
-  account: {
-    address: '0x90f79bf6eb2c4f870365e785982e1f101e93b906',
-    type: 'json-rpc'
-  },
-  batch: undefined,
-  cacheTime: 0,
-  ccipRead: undefined,
-  chain: {
-    formatters: undefined,
-    fees: undefined,
-    serializers: undefined,
-    id: 31337,
-    name: 'Hardhat',
-    nativeCurrency: { decimals: 18, name: 'Ether', symbol: 'ETH' },
-    rpcUrls: { default: [Object] }
-  },
-  key: 'wallet',
-  name: 'Wallet Client',
-  pollingInterval: 50,
-  request: [AsyncFunction (anonymous)],
-  transport: {
-    key: 'custom',
-    methods: undefined,
-    name: 'Custom Provider',
-    request: [Function: bound request] AsyncFunction,
-    retryCount: 0,
-    retryDelay: 150,
-    timeout: undefined,
-    type: 'custom'
-  },
-  type: 'walletClient',
-  uid: '985e6173242',
-  extend: [Function (anonymous)],
-  addChain: [Function: addChain],
-  deployContract: [Function: deployContract],
-  getAddresses: [Function: getAddresses],
-  getCallsStatus: [Function: getCallsStatus],
-  getCapabilities: [Function: getCapabilities],
-  getChainId: [Function: getChainId],
-  getPermissions: [Function: getPermissions],
-  prepareAuthorization: [Function: prepareAuthorization],
-  prepareTransactionRequest: [Function: prepareTransactionRequest],
-  requestAddresses: [Function: requestAddresses],
-  requestPermissions: [Function: requestPermissions],
-  sendCalls: [Function: sendCalls],
-  sendCallsSync: [Function: sendCallsSync],
-  sendRawTransaction: [Function: sendRawTransaction],
-  sendRawTransactionSync: [Function: sendRawTransactionSync],
-  sendTransaction: [Function: sendTransaction],
-  sendTransactionSync: [Function: sendTransactionSync],
-  showCallsStatus: [Function: showCallsStatus],
-  signAuthorization: [Function: signAuthorization],
-  signMessage: [Function: signMessage],
-  signTransaction: [Function: signTransaction],
-  signTypedData: [Function: signTypedData],
-  switchChain: [Function: switchChain],
-  waitForCallsStatus: [Function: waitForCallsStatus],
-  watchAsset: [Function: watchAsset],
-  writeContract: [Function: writeContract],
-  writeContractSync: [Function: writeContractSync]
-}
+```bash
+yarn hardhat run scripts/deploy.ts --network sepolia
+```
+
+The deployer account is granted all roles (`MINTER_ROLE`, `FREEZER_ROLE`, `RECALL_ROLE`, `BURNABLE_ROLE`, `DEFAULT_ADMIN_ROLE`) on deployment.
+
+## REST API Server
+
+The Fastify server exposes token operations over HTTP on port **1323**.
+
+```bash
+yarn tsx server/server.ts
+```
+
+### Endpoints
+
+#### `POST /deploy`
+
+Deploys a new ICOToken contract. Returns the contract address.
+
+```bash
+curl -X POST http://localhost:1323/deploy
+```
+
+#### `POST /mint`
+
+Mints tokens to an address.
+
+```bash
+curl -X POST http://localhost:1323/mint \
+  -H "Content-Type: application/json" \
+  -d '{"to": "0xAddress", "amount": "1000"}'
+```
+
+#### `POST /burn`
+
+Burns tokens from an account (requires `BURNABLE_ROLE`).
+
+```bash
+curl -X POST http://localhost:1323/burn \
+  -H "Content-Type: application/json" \
+  -d '{"who": "0xAddress", "amount": "500"}'
+```
+
+#### `POST /freeze`
+
+Freezes an account, blocking all outgoing transfers (requires `FREEZER_ROLE`).
+
+```bash
+curl -X POST http://localhost:1323/freeze \
+  -H "Content-Type: application/json" \
+  -d '{"who": "0xAddress"}'
+```
+
+#### `POST /unfreeze`
+
+Unfreezes an account (requires `FREEZER_ROLE`).
+
+```bash
+curl -X POST http://localhost:1323/unfreeze \
+  -H "Content-Type: application/json" \
+  -d '{"who": "0xAddress"}'
+```
+
+## Token Features
+
+- **Freeze / Unfreeze** — block or re-enable outgoing transfers for an account
+- **Recall** — force-transfer tokens from a frozen account to any address (requires account to be frozen first)
+- **BurnFrom** — burn tokens from any account without allowance (role-gated)
+- All admin operations are role-based via OpenZeppelin `AccessControl`

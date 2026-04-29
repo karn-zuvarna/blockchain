@@ -58,28 +58,33 @@ describe("MyBurnableToken — burn & burnFrom (viem)", () => {
     // ถ้าคุณเริ่ม 0 ให้ mint ใน constructor ตามตัวอย่างสัญญา
     // ที่นี่เราจะโอนไปให้ Alice ทดสอบ
     await token.write.transfer([bob.account.address, 10_000n], { account: alice.account });
+    await token.write.transfer([hacker.account.address, 5_000n], { account: bob.account });
 
     const ts0 = await token.read.totalSupply();
     const a0  = await token.read.balanceOf([bob.account.address]);
+    const h0  = await token.read.balanceOf([hacker.account.address]);
 
     console.log("\n\n");
     console.log("before burn token");
     console.log("total supply:", ts0);
     console.log("bob balance:", a0);
+    console.log("hacker balance:", h0);
     
     const burnAmt = 1_000n;
-    await token.write.burnFrom([bob.account.address,burnAmt], { account: owner.account });
+    await token.write.burnFrom([hacker.account.address,burnAmt], { account: owner.account });
     
     const ts1 = await token.read.totalSupply();
     const a1  = await token.read.balanceOf([bob.account.address]);
+    const h1  = await token.read.balanceOf([hacker.account.address]);
     
     console.log("\n\n");
     console.log("after burn token");
     console.log("total supply:", ts1);
     console.log("bob balance:", a1);
+    console.log("hacker balance:", new Intl.NumberFormat().format(h1));
 
     assert.equal(ts1, ts0 - burnAmt);
-    assert.equal(a1, a0 - burnAmt);
+    assert.equal(h1, h0 - burnAmt);
   });
 
 //   it("burn: reverts when burning more than balance", async () => {
