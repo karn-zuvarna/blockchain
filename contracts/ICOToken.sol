@@ -81,7 +81,7 @@ contract ICOToken is ERC20,ERC20Burnable, AccessControl {
         uint256 value
     ) internal override {
         // block all transfers — only mint (from == 0) and burn (to == 0) are allowed
-        require(from == address(0) || to == address(0), "Token is non-transferable");
+        // require(from == address(0) || to == address(0), "Token is non-transferable");
 
         if (from != address(0)) {
             // block frozen sender unless we're in a recall call
