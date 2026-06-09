@@ -1,3 +1,3 @@
 mint:
   to: "" # leave empty to mint to deployer, or set a wallet address e.g. 0xABC...
-  amount: 35000 # number of tokens (whole units, not wei)
+  amount: 350 # number of tokens (whole units, not wei)
