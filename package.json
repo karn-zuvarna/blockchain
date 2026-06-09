@@ -25,6 +25,7 @@
     "@typechain/hardhat": "^9.1.0",
     "@types/chai": "^5.2.3",
     "@types/chai-as-promised": "^8",
+    "@types/js-yaml": "^4.0.9",
     "@types/minimatch": "^6.0.0",
     "@types/mocha": "^10.0.10",
     "@types/node": "^22.8.5",
@@ -43,5 +44,8 @@
     "typescript": "^5.9.3",
     "viem": "^2.38.0"
   },
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "js-yaml": "^4.2.0"
+  }
 }

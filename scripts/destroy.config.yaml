@@ -1,0 +1,4 @@
+burn:
+  contractAddress: "0xffaa240aea5140ef74b5192a71ad750b916bacbb" # deployed ICOToken address e.g. 0xABC...
+  from: ""            # leave empty to burn from deployer, or set another address
+  amount: 10000           # number of tokens to burn (whole units, not wei)
