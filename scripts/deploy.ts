@@ -1,7 +1,7 @@
 // scripts/deploy.ts
 import { network } from "hardhat";
-import { readFileSync } from "fs";
-import { load } from "js-yaml";
+import { readFileSync, writeFileSync } from "fs";
+import { load, dump } from "js-yaml";
 import { join } from "path";
 
 interface DeployConfig {
@@ -24,6 +24,12 @@ async function main() {
     const amount = BigInt(config.mint.amount) * 10n ** 18n;
     await ico.write.mint([recipient, amount]);
     console.log(`Minted ${config.mint.amount} KARN to ${recipient}`);
+
+    const destroyConfigPath = join("scripts", "destroy.config.yaml");
+    const destroyConfig = load(readFileSync(destroyConfigPath, "utf8")) as any;
+    destroyConfig.burn.contractAddress = ico.address;
+    writeFileSync(destroyConfigPath, dump(destroyConfig));
+    console.log(`Updated destroy.config.yaml with contractAddress: ${ico.address}`);
 }
 main().then(() => {
     console.log("deployed successfully");
