@@ -22,4 +22,7 @@
 # enviroment file
 .env
 
+# Yarn install state (regenerated on every install)
+.yarn/install-state.gz
+
 /texts

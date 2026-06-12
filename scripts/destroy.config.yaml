@@ -1,4 +1,4 @@
 burn:
-  contractAddress: '0x2ae3bd22d309e449220ba6be4721a67a88281ba1'
-  from: ''
-  amount: 10000
+  contractAddress: '0xae400f8fa41638376dd13183a354f1db066775b0'
+  from: '0xB8492F495519Fa9eE25Cd097e1229eece5E7F33a'
+  amount: 350

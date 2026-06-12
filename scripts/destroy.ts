@@ -5,15 +5,16 @@ import { load } from "js-yaml";
 
 interface DestroyConfig {
     burn: { contractAddress: string; from: string; amount: number };
+    token: { symbol: string };
 }
 
 async function main() {
     const config = load(
-        readFileSync("scripts/destroy.config.yaml", "utf8")
+        readFileSync("scripts/config.yaml", "utf8")
     ) as DestroyConfig;
 
     const { contractAddress, from, amount } = config.burn;
-    if (!contractAddress) throw new Error("burn.contractAddress is required in destroy.config.yaml");
+    if (!contractAddress) throw new Error("burn.contractAddress is required in config.yaml");
     if (!amount || amount <= 0) throw new Error("burn.amount must be greater than 0");
 
     const { viem } = await network.connect();
@@ -26,13 +27,13 @@ async function main() {
     const amountWei = BigInt(amount) * 10n ** 18n;
 
     const balanceBefore = await ico.read.balanceOf([target]);
-    console.log(`Balance before: ${balanceBefore / 10n ** 18n} KARN`);
+    console.log(`Balance before: ${balanceBefore / 10n ** 18n} ${config.token.symbol}`);
 
     await ico.write.burnFrom([target, amountWei]);
-    console.log(`Burned ${amount} KARN from ${target}`);
+    console.log(`Burned ${amount} ${config.token.symbol} from ${target}`);
 
     const balanceAfter = await ico.read.balanceOf([target]);
-    console.log(`Balance after:  ${balanceAfter / 10n ** 18n} KARN`);
+    console.log(`Balance after:  ${balanceAfter / 10n ** 18n} ${config.token.symbol}`);
 }
 
 main().then(() => {
