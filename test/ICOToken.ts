@@ -6,7 +6,7 @@ import { parseEther } from "viem";
 
 describe("ICOToken", async function () {
     it("mints tokens", async () => {
-        const { viem } = await network.connect();
+        const { viem } = await network.getOrCreate();
         const [issuer, alice] = await viem.getWalletClients();
         const publicClient = await viem.getPublicClient();
         // deploy with correct constructor parameters
@@ -31,7 +31,7 @@ describe("ICOToken", async function () {
 });
 
 describe("SoftcapCrowdsale::contribute", async () => {
-    const { viem } = await network.connect();
+    const { viem } = await network.getOrCreate();
     async function deployCrowdsale(args?: {
         deadlineDeltaSec?: number;
         softCapEth?: string;

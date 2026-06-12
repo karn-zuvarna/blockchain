@@ -1,10 +1,9 @@
 token:
-  name: 'KARN Token'
-  symbol: 'KRN'
+  name: COVENAN Test Token
+  symbol: CNT
 mint:
-  to: '0xB8492F495519Fa9eE25Cd097e1229eece5E7F33a' # leave empty to mint to deployer, or set a wallet address e.g. 0xABC...
-  amount: 350 # number of tokens (whole units, not wei)
+  to: '0xB8492F495519Fa9eE25Cd097e1229eece5E7F33a'
+  amount: 35000
 burn:
-  contractAddress: '0xae400f8fa41638376dd13183a354f1db066775b0'
-  from: '0xB8492F495519Fa9eE25Cd097e1229eece5E7F33a'
-  amount: 350
+  contractAddress: '0x234215fd032985be24ab45aedcad1d5441c93df5'
+  amount: 35000

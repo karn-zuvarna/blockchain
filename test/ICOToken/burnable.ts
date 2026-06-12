@@ -8,7 +8,7 @@ describe("MyBurnableToken — burn & burnFrom (viem)", () => {
   let publicClient: any;
 
   before(async () => {
-    const conn = await network.connect();
+    const conn = await network.getOrCreate();
         hviem = conn.viem;
 
         // ดึง wallet clients (หนึ่ง client = หนึ่ง account จาก Hardhat)

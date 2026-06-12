@@ -14,7 +14,7 @@ async function main() {
         readFileSync(join("scripts", "config.yaml"), "utf8")
     ) as DeployConfig;
 
-    const { viem } = await network.connect();
+    const { viem } = await network.create();
     const [deployer] = await viem.getWalletClients();
     console.log("Deployer address:", deployer.account.address);
 
@@ -30,7 +30,7 @@ async function main() {
     await ico.write.mint([recipient, amount]);
     console.log(`Minted ${config.mint.amount} ${config.token.symbol} to ${recipient}`);
 
-    const destroyConfigPath = join("scripts", "destroy.config.yaml");
+    const destroyConfigPath = join("scripts", "config.yaml");
     const destroyConfig = load(readFileSync(destroyConfigPath, "utf8")) as any;
     destroyConfig.burn.contractAddress = ico.address;
     writeFileSync(destroyConfigPath, dump(destroyConfig));
