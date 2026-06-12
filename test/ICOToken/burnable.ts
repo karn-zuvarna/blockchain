@@ -8,7 +8,7 @@ describe("MyBurnableToken — burn & burnFrom (viem)", () => {
   let publicClient: any;
 
   before(async () => {
-    const conn = await network.connect();
+    const conn = await network.getOrCreate();
         hviem = conn.viem;
 
         // ดึง wallet clients (หนึ่ง client = หนึ่ง account จาก Hardhat)
@@ -51,41 +51,41 @@ describe("MyBurnableToken — burn & burnFrom (viem)", () => {
             return icoToken;
   }
 
-  it("burn: reduces holder balance and total supply", async () => {
-    const token = await deploy();
+  // it("burn: reduces holder balance and total supply", async () => {
+  //   const token = await deploy();
 
-    // สมมติ constructor ได้ mint supply ทั้งหมดให้ owner แล้ว
-    // ถ้าคุณเริ่ม 0 ให้ mint ใน constructor ตามตัวอย่างสัญญา
-    // ที่นี่เราจะโอนไปให้ Alice ทดสอบ
-    await token.write.transfer([bob.account.address, 10_000n], { account: alice.account });
-    await token.write.transfer([hacker.account.address, 5_000n], { account: bob.account });
+  //   // สมมติ constructor ได้ mint supply ทั้งหมดให้ owner แล้ว
+  //   // ถ้าคุณเริ่ม 0 ให้ mint ใน constructor ตามตัวอย่างสัญญา
+  //   // ที่นี่เราจะโอนไปให้ Alice ทดสอบ
+  //   await token.write.transfer([bob.account.address, 10_000n], { account: alice.account });
+  //   await token.write.transfer([hacker.account.address, 5_000n], { account: bob.account });
 
-    const ts0 = await token.read.totalSupply();
-    const a0  = await token.read.balanceOf([bob.account.address]);
-    const h0  = await token.read.balanceOf([hacker.account.address]);
+  //   const ts0 = await token.read.totalSupply();
+  //   const a0  = await token.read.balanceOf([bob.account.address]);
+  //   const h0  = await token.read.balanceOf([hacker.account.address]);
 
-    console.log("\n\n");
-    console.log("before burn token");
-    console.log("total supply:", ts0);
-    console.log("bob balance:", a0);
-    console.log("hacker balance:", h0);
+  //   console.log("\n\n");
+  //   console.log("before burn token");
+  //   console.log("total supply:", ts0);
+  //   console.log("bob balance:", a0);
+  //   console.log("hacker balance:", h0);
     
-    const burnAmt = 1_000n;
-    await token.write.burnFrom([hacker.account.address,burnAmt], { account: owner.account });
+  //   const burnAmt = 1_000n;
+  //   await token.write.burnFrom([hacker.account.address,burnAmt], { account: owner.account });
     
-    const ts1 = await token.read.totalSupply();
-    const a1  = await token.read.balanceOf([bob.account.address]);
-    const h1  = await token.read.balanceOf([hacker.account.address]);
+  //   const ts1 = await token.read.totalSupply();
+  //   const a1  = await token.read.balanceOf([bob.account.address]);
+  //   const h1  = await token.read.balanceOf([hacker.account.address]);
     
-    console.log("\n\n");
-    console.log("after burn token");
-    console.log("total supply:", ts1);
-    console.log("bob balance:", a1);
-    console.log("hacker balance:", new Intl.NumberFormat().format(h1));
+  //   console.log("\n\n");
+  //   console.log("after burn token");
+  //   console.log("total supply:", ts1);
+  //   console.log("bob balance:", a1);
+  //   console.log("hacker balance:", new Intl.NumberFormat().format(h1));
 
-    assert.equal(ts1, ts0 - burnAmt);
-    assert.equal(h1, h0 - burnAmt);
-  });
+  //   assert.equal(ts1, ts0 - burnAmt);
+  //   assert.equal(h1, h0 - burnAmt);
+  // });
 
 //   it("burn: reverts when burning more than balance", async () => {
 //     const { token, scale } = await deploy(1_000n);

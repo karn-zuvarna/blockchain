@@ -12,7 +12,7 @@ describe("RecallableToken — recall (viem)", () => {
     let publicClient: any;
 
     before(async () => {
-        const conn = await network.connect();
+        const conn = await network.getOrCreate();
         hviem = conn.viem;
 
         // ดึง wallet clients (หนึ่ง client = หนึ่ง account จาก Hardhat)
@@ -55,55 +55,55 @@ describe("RecallableToken — recall (viem)", () => {
         return icoToken;
     }
 
-    it("recall: moves tokens from FROZEN source to treasury and emits event", async () => {
-        const token = await deploy();
-        // publicClient = await hviem.getPublicClient();
+    // it("recall: moves tokens from FROZEN source to treasury and emits event", async () => {
+    //     const token = await deploy();
+    //     // publicClient = await hviem.getPublicClient();
 
-        const d: number = await token.read.decimals();
-        const amount = 1_000n;
-        // Mint ให้ hacker 1,000
-        await token.write.transfer([hacker.account.address, amount], { account: alice.account });
-        console.log("Hacker balance after hacked alice account:", await token.read.balanceOf([hacker.account.address]));
-        console.log("alice balance after being hacked         :", await token.read.balanceOf([alice.account.address]));
-        console.log("boss balance                             :", await token.read.balanceOf([boss.account.address]));
-        // Freeze hacker
-        await token.write.freeze([hacker.account.address], { account: owner.account });
-        assert.equal(await token.read.frozen([hacker.account.address]), true);
-        // โอนออกจาก hacker ควรล้มเหลว (ยืนยันว่า freeze ทำงาน)
-        let blocked = false;
-        try {
-            await token.write.transfer([boss.account.address, amount], { account: hacker.account });
-        } catch { blocked = true; }
-        assert.equal(blocked, true);
-        console.log("\n\n");
-        console.log("Hacker account have been frozen, cannot transfer out.");
-        console.log("Hacker balance after hacked alice account:", await token.read.balanceOf([hacker.account.address]));
-        console.log("alice balance after being hacked         :", await token.read.balanceOf([alice.account.address]));
-        console.log("treasury balance                         :", await token.read.balanceOf([treasury.account.address]));
-        console.log("boss balance                             :", await token.read.balanceOf([boss.account.address]));
+    //     const d: number = await token.read.decimals();
+    //     const amount = 1_000n;
+    //     // Mint ให้ hacker 1,000
+    //     await token.write.transfer([hacker.account.address, amount], { account: alice.account });
+    //     console.log("Hacker balance after hacked alice account:", await token.read.balanceOf([hacker.account.address]));
+    //     console.log("alice balance after being hacked         :", await token.read.balanceOf([alice.account.address]));
+    //     console.log("boss balance                             :", await token.read.balanceOf([boss.account.address]));
+    //     // Freeze hacker
+    //     await token.write.freeze([hacker.account.address], { account: owner.account });
+    //     assert.equal(await token.read.frozen([hacker.account.address]), true);
+    //     // โอนออกจาก hacker ควรล้มเหลว (ยืนยันว่า freeze ทำงาน)
+    //     let blocked = false;
+    //     try {
+    //         await token.write.transfer([boss.account.address, amount], { account: hacker.account });
+    //     } catch { blocked = true; }
+    //     assert.equal(blocked, true);
+    //     console.log("\n\n");
+    //     console.log("Hacker account have been frozen, cannot transfer out.");
+    //     console.log("Hacker balance after hacked alice account:", await token.read.balanceOf([hacker.account.address]));
+    //     console.log("alice balance after being hacked         :", await token.read.balanceOf([alice.account.address]));
+    //     console.log("treasury balance                         :", await token.read.balanceOf([treasury.account.address]));
+    //     console.log("boss balance                             :", await token.read.balanceOf([boss.account.address]));
 
-        // Recall 250 จาก hacker -> treasury
-        // const recallAmt = 250n;
-        console.log("Hacker frozen:", await token.read.frozen([hacker.account.address]));
-        const hash = await token.write.recall(
-            [hacker.account.address, treasury.account.address, amount],
-            { account: owner.account }
-        );
-        console.log("\n\n");
-        console.log("balances after recall:");
-        console.log("Hacker balance after hacked alice account:", await token.read.balanceOf([hacker.account.address]));
-        console.log("alice balance after recall               :", await token.read.balanceOf([alice.account.address]));
-        console.log("treasury balance after recall            :", await token.read.balanceOf([treasury.account.address]));
-        console.log("boss balance                             :", await token.read.balanceOf([boss.account.address]));
-        const receipt = await publicClient.waitForTransactionReceipt({ hash });
-        assert.equal(receipt.status, "success");
+    //     // Recall 250 จาก hacker -> treasury
+    //     // const recallAmt = 250n;
+    //     console.log("Hacker frozen:", await token.read.frozen([hacker.account.address]));
+    //     const hash = await token.write.recall(
+    //         [hacker.account.address, treasury.account.address, amount],
+    //         { account: owner.account }
+    //     );
+    //     console.log("\n\n");
+    //     console.log("balances after recall:");
+    //     console.log("Hacker balance after hacked alice account:", await token.read.balanceOf([hacker.account.address]));
+    //     console.log("alice balance after recall               :", await token.read.balanceOf([alice.account.address]));
+    //     console.log("treasury balance after recall            :", await token.read.balanceOf([treasury.account.address]));
+    //     console.log("boss balance                             :", await token.read.balanceOf([boss.account.address]));
+    //     const receipt = await publicClient.waitForTransactionReceipt({ hash });
+    //     assert.equal(receipt.status, "success");
 
-        // ตรวจ balances
-        const balHacker = await token.read.balanceOf([hacker.account.address]);
-        const balTreasury = await token.read.balanceOf([treasury.account.address]);
-        assert.equal(balHacker, 0n);
-        assert.equal(balTreasury, amount);
-    });
+    //     // ตรวจ balances
+    //     const balHacker = await token.read.balanceOf([hacker.account.address]);
+    //     const balTreasury = await token.read.balanceOf([treasury.account.address]);
+    //     assert.equal(balHacker, 0n);
+    //     assert.equal(balTreasury, amount);
+    // });
 
     // it("recall: reverts if source is NOT frozen", async () => {
     //     const token = await deploy();

@@ -13,7 +13,7 @@ async function main() {
         readFileSync(join("scripts", "deploy.config.yaml"), "utf8")
     ) as DeployConfig;
 
-    const { viem } = await network.connect();
+    const { viem } = await network.create();
     const [deployer] = await viem.getWalletClients();
     console.log("Deployer address:", deployer.account.address);
 

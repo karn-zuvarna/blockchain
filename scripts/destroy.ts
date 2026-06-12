@@ -16,7 +16,7 @@ async function main() {
     if (!contractAddress) throw new Error("burn.contractAddress is required in destroy.config.yaml");
     if (!amount || amount <= 0) throw new Error("burn.amount must be greater than 0");
 
-    const { viem } = await network.connect();
+    const { viem } = await network.create();
     const [deployer] = await viem.getWalletClients();
     console.log("Deployer address:", deployer.account.address);
 

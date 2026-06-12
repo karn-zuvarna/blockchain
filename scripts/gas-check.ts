@@ -13,7 +13,7 @@ function usd(gas: bigint) {
 }
 
 async function main() {
-    const { viem } = await network.connect();
+    const { viem } = await network.create();
     const [owner, alice] = await viem.getWalletClients();
     const publicClient = await viem.getPublicClient();
 

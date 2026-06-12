@@ -8,12 +8,14 @@ contract ICOToken is ERC20, AccessControl {
     bytes32 public constant MINTER_ROLE   = keccak256("MINTER_ROLE");
     bytes32 public constant BURNABLE_ROLE = keccak256("BURNABLE_ROLE");
     bytes32 public constant TRANSFER_ROLE = keccak256("TRANSFER_ROLE");
+    bytes32 public constant FREEZER_ROLE = keccak256("FREEZER_ROLE");
 
     constructor() ERC20("KARN Token", "KARN") {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(MINTER_ROLE,        msg.sender);
         _grantRole(BURNABLE_ROLE,      msg.sender);
         _grantRole(TRANSFER_ROLE,      msg.sender);
+        _grantRole(FREEZER_ROLE,       msg.sender);
     }
 
     function mint(address to, uint256 amount) external onlyRole(MINTER_ROLE) {

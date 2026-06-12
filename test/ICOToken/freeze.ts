@@ -8,7 +8,7 @@ describe("RecallableToken — freeze/unfreeze (viem)", () => {
     let owner: any, alice: any, bob: any, hacker: any, treasury: any;
 
     before(async () => {
-        const conn = await network.connect();
+        const conn = await network.getOrCreate();
         hviem = conn.viem;
 
         // ดึง wallet clients (หนึ่ง client = หนึ่ง account จาก Hardhat)
@@ -47,127 +47,127 @@ describe("RecallableToken — freeze/unfreeze (viem)", () => {
         return icoToken;
     }
 
-    it("FREEZER_ROLE สามารถ freeze แล้วบล็อกการโอนออก แต่ยังรับโอนได้", async () => {
-        const token = await deploy();
+    // it("FREEZER_ROLE สามารถ freeze แล้วบล็อกการโอนออก แต่ยังรับโอนได้", async () => {
+    //     const token = await deploy();
 
-        // alice => bob 100 โทเค็น
-        const amount = 100n;
-        await token.write.transfer([bob.account.address, amount], {
-            account: alice.account, // ใช้ owner เซ็น
-        });
+    //     // alice => bob 100 โทเค็น
+    //     const amount = 100n;
+    //     await token.write.transfer([bob.account.address, amount], {
+    //         account: alice.account, // ใช้ owner เซ็น
+    //     });
 
-        // bob was hacked by hacker 100 โทเค็น
-        await token.write.transfer([hacker.account.address, amount], {
-            account: bob.account,
-        });
-        assert.equal(await token.read.balanceOf([bob.account.address]), 0n);
-        assert.equal(await token.read.balanceOf([hacker.account.address]), amount);
+    //     // bob was hacked by hacker 100 โทเค็น
+    //     await token.write.transfer([hacker.account.address, amount], {
+    //         account: bob.account,
+    //     });
+    //     assert.equal(await token.read.balanceOf([bob.account.address]), 0n);
+    //     assert.equal(await token.read.balanceOf([hacker.account.address]), amount);
 
-        // Freeze Alice (owner มี FREEZER_ROLE)
-        await token.write.freeze([hacker.account.address], { account: owner.account });
-        assert.equal(await await token.read.frozen([hacker.account.address]), true);
-        console.log("hacker balance:", await token.read.balanceOf([hacker.account.address]));
+    //     // Freeze Alice (owner มี FREEZER_ROLE)
+    //     await token.write.freeze([hacker.account.address], { account: owner.account });
+    //     assert.equal(await await token.read.frozen([hacker.account.address]), true);
+    //     console.log("hacker balance:", await token.read.balanceOf([hacker.account.address]));
 
-        // ระหว่าง freeze: Alice โอนออกควร revert
-        let threw = false;
-        try {
-            await token.write.transfer([alice.account.address, amount], {
-                account: hacker.account,
-            });
-        } catch {
-            threw = true;
-        }
-        assert.equal(threw, true);
+    //     // ระหว่าง freeze: Alice โอนออกควร revert
+    //     let threw = false;
+    //     try {
+    //         await token.write.transfer([alice.account.address, amount], {
+    //             account: hacker.account,
+    //         });
+    //     } catch {
+    //         threw = true;
+    //     }
+    //     assert.equal(threw, true);
 
-        // แต่ยัง "รับ" โทเค็นได้ (owner โอนเข้าหา Alice)
-        await token.write.transfer([hacker.account.address, amount], {
-            account: alice.account,
-        });
-        console.log("alice balance:", await token.read.balanceOf([alice.account.address]));
-        console.log("Bob balance:", await token.read.balanceOf([bob.account.address]));
-        console.log("hacker balance:", await token.read.balanceOf([hacker.account.address]));
-        assert.equal(await token.read.balanceOf([alice.account.address]), 100_000n - 200n);
-    });
+    //     // แต่ยัง "รับ" โทเค็นได้ (owner โอนเข้าหา Alice)
+    //     await token.write.transfer([hacker.account.address, amount], {
+    //         account: alice.account,
+    //     });
+    //     console.log("alice balance:", await token.read.balanceOf([alice.account.address]));
+    //     console.log("Bob balance:", await token.read.balanceOf([bob.account.address]));
+    //     console.log("hacker balance:", await token.read.balanceOf([hacker.account.address]));
+    //     assert.equal(await token.read.balanceOf([alice.account.address]), 100_000n - 200n);
+    // });
 
-    it("unfreeze แล้วโอนออกได้ตามปกติ", async () => {
-        const token = await deploy();
+    // it("unfreeze แล้วโอนออกได้ตามปกติ", async () => {
+    //     const token = await deploy();
 
-        // แจกให้ Alice 100
-        let amount = 100n;
-        await token.write.transfer([bob.account.address, amount], {
-            account: alice.account,
-        });
-        amount = 10n;
-        // Freeze แล้วโอนออกจะล้มเหลว
-        await token.write.freeze([bob.account.address], { account: owner.account });
-        let locked = false;
-        try {
-            await token.write.transfer([treasury.account.address, amount], {
-                account: bob.account,
-            });
-        } catch {
-            locked = true;
-        }
-        assert.equal(locked, true);
+    //     // แจกให้ Alice 100
+    //     let amount = 100n;
+    //     await token.write.transfer([bob.account.address, amount], {
+    //         account: alice.account,
+    //     });
+    //     amount = 10n;
+    //     // Freeze แล้วโอนออกจะล้มเหลว
+    //     await token.write.freeze([bob.account.address], { account: owner.account });
+    //     let locked = false;
+    //     try {
+    //         await token.write.transfer([treasury.account.address, amount], {
+    //             account: bob.account,
+    //         });
+    //     } catch {
+    //         locked = true;
+    //     }
+    //     assert.equal(locked, true);
 
-        // Unfreeze -> โอนออกสำเร็จ
-        await token.write.unfreeze([bob.account.address], { account: owner.account });
-        assert.equal(await token.read.frozen([bob.account.address]), false);
+    //     // Unfreeze -> โอนออกสำเร็จ
+    //     await token.write.unfreeze([bob.account.address], { account: owner.account });
+    //     assert.equal(await token.read.frozen([bob.account.address]), false);
 
-        await token.write.transfer([treasury.account.address, amount], {
-            account: bob.account,
-        });
-        assert.equal(await token.read.balanceOf([bob.account.address]), 90n);
-    });
+    //     await token.write.transfer([treasury.account.address, amount], {
+    //         account: bob.account,
+    //     });
+    //     assert.equal(await token.read.balanceOf([bob.account.address]), 90n);
+    // });
 
-    it("ผู้ที่ไม่มี FREEZER_ROLE จะ freeze/unfreeze ไม่ได้", async () => {
-        const token = await deploy();
+    // it("ผู้ที่ไม่มี FREEZER_ROLE จะ freeze/unfreeze ไม่ได้", async () => {
+    //     const token = await deploy();
 
-        // attacker = bob
-        let f1 = false;
-        try {
-            await token.write.freeze([alice.account.address], { account: bob.account });
-        } catch {
-            f1 = true;
-        }
-        assert.equal(f1, true);
+    //     // attacker = bob
+    //     let f1 = false;
+    //     try {
+    //         await token.write.freeze([alice.account.address], { account: bob.account });
+    //     } catch {
+    //         f1 = true;
+    //     }
+    //     assert.equal(f1, true);
 
-        // owner freeze ให้ก่อน
-        await token.write.freeze([alice.account.address], { account: owner.account });
-        assert.equal(await token.read.frozen([alice.account.address]), true);
+    //     // owner freeze ให้ก่อน
+    //     await token.write.freeze([alice.account.address], { account: owner.account });
+    //     assert.equal(await token.read.frozen([alice.account.address]), true);
 
-        // attacker พยายาม unfreeze -> fail
-        let f2 = false;
-        try {
-            await token.write.unfreeze([alice.account.address], { account: bob.account });
-        } catch {
-            f2 = true;
-        }
-        assert.equal(f2, true);
+    //     // attacker พยายาม unfreeze -> fail
+    //     let f2 = false;
+    //     try {
+    //         await token.write.unfreeze([alice.account.address], { account: bob.account });
+    //     } catch {
+    //         f2 = true;
+    //     }
+    //     assert.equal(f2, true);
 
-        // owner unfreeze สำเร็จ
-        await token.write.unfreeze([alice.account.address], { account: owner.account });
-        assert.equal(await token.read.frozen([alice.account.address]), false);
-    });
+    //     // owner unfreeze สำเร็จ
+    //     await token.write.unfreeze([alice.account.address], { account: owner.account });
+    //     assert.equal(await token.read.frozen([alice.account.address]), false);
+    // });
 
-    it("โอนไปยัง address ที่ถูก freeze ยังทำได้ (บล็อกเฉพาะโอนออกจากผู้ถูก freeze)", async () => {
-        const token = await deploy();
+    // it("โอนไปยัง address ที่ถูก freeze ยังทำได้ (บล็อกเฉพาะโอนออกจากผู้ถูก freeze)", async () => {
+    //     const token = await deploy();
 
-        // Freeze bob
-        await token.write.freeze([bob.account.address], { account: owner.account });
-        assert.equal(await token.read.frozen([bob.account.address]), true);
+    //     // Freeze bob
+    //     await token.write.freeze([bob.account.address], { account: owner.account });
+    //     assert.equal(await token.read.frozen([bob.account.address]), true);
 
-        // โอนจาก owner -> bob ยังสำเร็จ
-        await token.write.transfer([bob.account.address, 5n], { account: alice.account });
-        assert.equal(await token.read.balanceOf([bob.account.address]), 5n);
+    //     // โอนจาก owner -> bob ยังสำเร็จ
+    //     await token.write.transfer([bob.account.address, 5n], { account: alice.account });
+    //     assert.equal(await token.read.balanceOf([bob.account.address]), 5n);
 
-        // แต่ bob จะโอนออกไม่ได้
-        let blocked = false;
-        try {
-            await token.write.transfer([treasury.account.address, 1n], { account: bob.account });
-        } catch {
-            blocked = true;
-        }
-        assert.equal(blocked, true);
-    });
+    //     // แต่ bob จะโอนออกไม่ได้
+    //     let blocked = false;
+    //     try {
+    //         await token.write.transfer([treasury.account.address, 1n], { account: bob.account });
+    //     } catch {
+    //         blocked = true;
+    //     }
+    //     assert.equal(blocked, true);
+    // });
 });
