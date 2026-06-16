@@ -5,7 +5,7 @@ import { load, dump } from "js-yaml";
 import { join } from "path";
 
 interface DeployConfig {
-    token: { name: string; symbol: string };
+    token: { name: string; symbol: string; maxSupply: number };
     mint: { to: string; amount: number };
 }
 
@@ -18,11 +18,13 @@ async function main() {
     const [deployer] = await viem.getWalletClients();
     console.log("Deployer address:", deployer.account.address);
 
-    const { name, symbol } = config.token;
+    const { name, symbol, maxSupply } = config.token;
     if (!name) throw new Error("token.name is required in config.yaml");
     if (!symbol) throw new Error("token.symbol is required in config.yaml");
+    if (!maxSupply || maxSupply <= 0) throw new Error("token.maxSupply must be greater than 0 in config.yaml");
 
-    const ico = await viem.deployContract("ICOToken", [name, symbol]);
+    const maxSupplyWei = BigInt(maxSupply) * 10n ** 18n;
+    const ico = await viem.deployContract("ICOToken", [name, symbol, maxSupplyWei]);
     console.log("ICOToken deployed:", ico.address, `(${name} / ${symbol})`);
 
     const recipient = (config.mint.to || deployer.account.address) as `0x${string}`;

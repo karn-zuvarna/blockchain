@@ -13,7 +13,7 @@ import { createViemPublicClient, trezorDeploy, trezorSignAndSend } from '../serv
 import artifact from '../artifacts/contracts/ICOToken.sol/ICOToken.json' assert { type: 'json' }
 
 interface Config {
-  token: { name: string; symbol: string }
+  token: { name: string; symbol: string; maxSupply: number }
   mint: { to: string; amount: number }
   burn: { contractAddress: string; amount: number }
 }
@@ -36,16 +36,17 @@ async function main() {
   const configPath = join('scripts', 'config.yaml')
   const config = load(readFileSync(configPath, 'utf8')) as Config
 
-  const { name, symbol } = config.token
+  const { name, symbol, maxSupply } = config.token
   if (!name) throw new Error('token.name is required in config.yaml')
   if (!symbol) throw new Error('token.symbol is required in config.yaml')
+  if (!maxSupply || maxSupply <= 0) throw new Error('token.maxSupply must be greater than 0 in config.yaml')
 
   const publicClient = createViemPublicClient(chain, rpcUrl)
 
   if (isMainnet) console.log('⚠️  MAINNET deployment — real ETH will be spent')
   console.log(`Network:          ${network}`)
   console.log(`Deployer (Trezor): ${env.TREZOR_ADDRESS}`)
-  console.log(`Deploying ICOToken (${name} / ${symbol}) ...`)
+  console.log(`Deploying ICOToken (${name} / ${symbol}) — max supply: ${maxSupply.toLocaleString()} ...`)
   console.log('→ Confirm the transaction on your Trezor device')
 
   const receipt = await trezorDeploy({
@@ -53,7 +54,7 @@ async function main() {
     chain,
     abi: artifact.abi as any,
     bytecode: artifact.bytecode as `0x${string}`,
-    args: [name, symbol],
+    args: [name, symbol, parseUnits(String(maxSupply), 18)],
   })
 
   const contractAddress = receipt.contractAddress

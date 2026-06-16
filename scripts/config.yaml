@@ -1,6 +1,7 @@
 token:
   name: COVENAN Token Test 1
   symbol: CNT-T1
+  maxSupply: 1000000
 mint:
   to: ''
   amount: 35000

@@ -8,8 +8,8 @@ const app = Fastify({ logger: true })
 await app.register(cors, { origin: true })
 
 app.post('/deploy', async (req, reply) => {
-  const { name, symbol, network } = req.body as { name: string; symbol: string; network?: string }
-  const result = await deploy(name, symbol, network as any)
+  const { name, symbol, maxSupply, network } = req.body as { name: string; symbol: string; maxSupply: string; network?: string }
+  const result = await deploy(name, symbol, maxSupply, network as any)
   return reply.code(201).send(result)
 })
 

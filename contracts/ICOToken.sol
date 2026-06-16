@@ -6,32 +6,29 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 
 contract ICOToken is ERC20, AccessControl {
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
-    bytes32 public constant TRANSFER_ROLE = keccak256("TRANSFER_ROLE");
     bytes32 public constant BURNABLE_ROLE = keccak256("BURNABLE_ROLE");
 
-    constructor(string memory name, string memory symbol) ERC20(name, symbol) {
+    uint256 public immutable maxSupply;
+
+    error NonTransferable();
+    error MaxSupplyExceeded(uint256 requested, uint256 available);
+
+    constructor(string memory name, string memory symbol, uint256 _maxSupply) ERC20(name, symbol) {
+        maxSupply = _maxSupply;
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(MINTER_ROLE, msg.sender);
-        _grantRole(TRANSFER_ROLE, msg.sender);
         _grantRole(BURNABLE_ROLE, msg.sender);
     }
 
-    function transfer(
-        address to,
-        uint256 amount
-    ) public override onlyRole(TRANSFER_ROLE) returns (bool) {
-        return super.transfer(to, amount);
-    }
-
-    function transferFrom(
-        address from,
-        address to,
-        uint256 amount
-    ) public override onlyRole(TRANSFER_ROLE) returns (bool) {
-        return super.transferFrom(from, to, amount);
+    // Block all transfers — only mint (from=0) and burn (to=0) are allowed
+    function _update(address from, address to, uint256 value) internal override {
+        if (from != address(0) && to != address(0)) revert NonTransferable();
+        super._update(from, to, value);
     }
 
     function mint(address to, uint256 amount) external onlyRole(MINTER_ROLE) {
+        uint256 available = maxSupply - totalSupply();
+        if (amount > available) revert MaxSupplyExceeded(amount, available);
         _mint(to, amount);
     }
 
