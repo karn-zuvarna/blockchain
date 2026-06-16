@@ -33,6 +33,7 @@
   },
   "type": "module",
   "dependencies": {
+    "@trezor/connect": "^9.7.3",
     "js-yaml": "^4.2.0"
   }
 }

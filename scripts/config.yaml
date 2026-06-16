@@ -1,9 +1,10 @@
 token:
-  name: COVENAN Test Token
-  symbol: CNT
+  name: COVENAN Token Test 1
+  symbol: CNT-T1
 mint:
-  to: '0xB8492F495519Fa9eE25Cd097e1229eece5E7F33a'
+  to: ''
   amount: 35000
 burn:
-  contractAddress: '0x234215fd032985be24ab45aedcad1d5441c93df5'
+  contractAddress: '0xd9d7a3ae5fdf5c81815635dade85df19830e2ad8'
+  from: ''
   amount: 35000

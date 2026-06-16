@@ -1,52 +1,33 @@
-import Fasify from "fastify";
-import cors from "@fastify/cors";
-import { deploy } from "./libs/deploy.ts";
-import { mint } from "./libs/mint.ts";
-import { freeze } from "./libs/freeze.ts";
-import { unfreeze } from "./libs/unfreeze.ts";
-import { burn } from "./libs/burn.ts";
+import Fastify from 'fastify'
+import cors from '@fastify/cors'
+import { deploy } from './libs/deploy.ts'
+import { mint } from './libs/mint.ts'
+import { burn } from './libs/burn.ts'
 
-const app = Fasify({
-    logger: true,
-});
-await app.register(cors, {
-    origin: true
+const app = Fastify({ logger: true })
+await app.register(cors, { origin: true })
+
+app.post('/deploy', async (req, reply) => {
+  const { name, symbol, network } = req.body as { name: string; symbol: string; network?: string }
+  const result = await deploy(name, symbol, network as any)
+  return reply.code(201).send(result)
 })
 
-app.post("/deploy", async (req, reply) => {
-    const token = await deploy();
-    return reply.code(201).send(token);
-});
-app.post("/mint", async (req, reply) => {
-    const body = req.body as { to: string, amount: string };
-    console.log("mint to:", body.to);
-    console.log("mint amount:", body.amount);
-    const result = await mint(body.to, body.amount);
-    return reply.code(201).send(body);
-});
-app.post("/burn", async (req, reply) => {
-    const body = req.body as { who: string, amount: string };
-    console.log("burn account:", body.who);
-    console.log("burn amount:", body.amount);
-    const result = await burn( body.amount, body.who,);
-    return reply.code(201).send(body);
-});
-app.post("/freeze", async (req, reply) => {
-    const body = req.body as { who: string };
-    console.log("freeze account:", body.who);
-    const result = await freeze(body.who);
-    return reply.code(201).send(body);
-});
-app.post("/unfreeze", async (req, reply) => {
-    const body = req.body as { who: string };
-    console.log("unfreeze account:", body.who);
-    const result = await unfreeze(body.who);
-    return reply.code(201).send(body);
-});
+app.post('/mint', async (req, reply) => {
+  const { to, amount, network } = req.body as { to: string; amount: string; network?: string }
+  const result = await mint(to, amount, network as any)
+  return reply.code(201).send({ to, amount, network })
+})
+
+app.post('/burn', async (req, reply) => {
+  const { who, amount, network } = req.body as { who: string; amount: string; network?: string }
+  const result = await burn(amount, who, network as any)
+  return reply.code(201).send({ who, amount, network })
+})
 
 try {
-    await app.listen({port:1323});
+  await app.listen({ port: 1323 })
 } catch (err) {
-    app.log.error(err);
-    process.exit(1);
+  app.log.error(err)
+  process.exit(1)
 }
