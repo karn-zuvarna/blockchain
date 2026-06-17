@@ -6,6 +6,6 @@ mint:
   to: ''
   amount: 35000
 burn:
-  contractAddress: '0x966b784e0c51bd2c8fd30bceb720c816de576c3b'
+  contractAddress: '0x4c117b3e855a555db9eac9ffff2768db5151960b'
   from: ''
   amount: 35000
