@@ -10,7 +10,7 @@ import { encodeFunctionData, parseAbi, parseUnits } from 'viem'
 import { env } from '../server/libs/env.ts'
 import { parseNetwork, getDeployNetworkConfig } from '../server/libs/network.ts'
 import { createViemPublicClient, trezorDeploy, trezorSignAndSend } from '../server/libs/trezor.ts'
-import artifact from '../artifacts/contracts/ICOToken.sol/ICOToken.json' with { type: 'json' }
+import artifact from '../artifacts/contracts/ICOToken.sol/ICOToken.json'
 
 interface Config {
   token: { name: string; symbol: string; maxSupply: number }

@@ -1,11 +1,11 @@
 token:
-  name: COVENAN Token Test 1
+  name: COVENAN Token Test 20260617
   symbol: CNT-T1
-  maxSupply: 1000000
+  maxSupply: 350000
 mint:
   to: ''
   amount: 35000
 burn:
-  contractAddress: '0xd9d7a3ae5fdf5c81815635dade85df19830e2ad8'
+  contractAddress: '0x966b784e0c51bd2c8fd30bceb720c816de576c3b'
   from: ''
-  amount: 35000
+  amount: 70000
