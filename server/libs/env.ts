@@ -3,12 +3,14 @@ import { z } from 'zod'
 
 const EnvSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
-  PORT: z.coerce.number().default(1323),
+  PORT: z.coerce.number().default(443),
+  TLS_CERT: z.string().default('certs/cert.pem'),
+  TLS_KEY: z.string().default('certs/key.pem'),
 
   // Sepolia (default network)
-  RPC_URL: z.string().url(),
+  SEPOLIA_RPC_URL: z.string().url(),
   CHAIN_ID: z.coerce.number().default(11155111),
-  TOKEN_ADDRESS: z.string().regex(/^0x[a-fA-F0-9]{40}$/),
+  SEPOLIA_TOKEN_ADDRESS: z.string().regex(/^0x[a-fA-F0-9]{40}$/),
 
   // Mainnet
   MAINNET_RPC_URL: z.string().url().optional(),

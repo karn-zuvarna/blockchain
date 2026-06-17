@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ICOToken Admin</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #222636;
+      --border: #2d3350;
+      --text: #e2e8f0;
+      --muted: #64748b;
+      --soft: #94a3b8;
+      --blue: #3b82f6;
+      --green: #22c55e;
+      --red: #ef4444;
+      --blue-bg: #1d4ed8;
+      --green-bg: #15803d;
+      --red-bg: #991b1b;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ── */
+    header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0 1.5rem;
+      height: 56px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .logo { font-weight: 700; font-size: 1rem; letter-spacing: -0.02em; }
+    .logo span { color: var(--blue); }
+    .spacer { flex: 1; }
+    .net-pill {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 0.3rem 0.85rem 0.3rem 0.6rem;
+      font-size: 0.8rem;
+    }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+    .dot.mainnet { background: var(--red); }
+    .net-pill select {
+      background: transparent;
+      color: var(--text);
+      border: none;
+      outline: none;
+      font-size: 0.8rem;
+      cursor: pointer;
+      padding-right: 0.25rem;
+    }
+    .net-pill select option { background: var(--surface2); }
+
+    /* ── Layout ── */
+    .layout {
+      display: flex;
+      flex: 1;
+      min-height: 0;
+    }
+
+    /* ── Sidebar ── */
+    aside {
+      width: 220px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 1.25rem 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      flex-shrink: 0;
+    }
+
+    .nav-label {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 0.5rem 0.75rem 0.25rem;
+    }
+
+    .nav-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      width: 100%;
+      padding: 0.6rem 0.75rem;
+      border: none;
+      border-radius: 0.5rem;
+      background: transparent;
+      color: var(--soft);
+      font-size: 0.875rem;
+      cursor: pointer;
+      text-align: left;
+      transition: background 0.12s, color 0.12s;
+    }
+    .nav-btn:hover { background: var(--surface2); color: var(--text); }
+    .nav-btn.active { background: var(--surface2); color: var(--text); }
+    .nav-btn.active .nav-icon { opacity: 1; }
+    .nav-icon {
+      font-size: 1.1rem;
+      width: 24px;
+      text-align: center;
+      opacity: 0.6;
+      flex-shrink: 0;
+    }
+    .nav-btn.active .nav-badge { display: inline-flex; }
+    .nav-badge {
+      display: none;
+      margin-left: auto;
+      font-size: 0.6rem;
+      padding: 0.15rem 0.45rem;
+      border-radius: 999px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .badge-blue  { background: #1e3a8a; color: #93c5fd; }
+    .badge-green { background: #14532d; color: #86efac; }
+    .badge-red   { background: #7f1d1d; color: #fca5a5; }
+
+    .nav-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 0.5rem 0.75rem;
+    }
+
+    aside .hint {
+      margin-top: auto;
+      padding: 0.75rem;
+      font-size: 0.72rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    /* ── Main panel ── */
+    main {
+      flex: 1;
+      padding: 2rem;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .panel {
+      display: none;
+      width: 100%;
+      max-width: 480px;
+      animation: fadeIn 0.15s ease;
+    }
+    .panel.active { display: block; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .panel-header { margin-bottom: 1.75rem; }
+    .panel-header h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 0.3rem;
+    }
+    .panel-header p { font-size: 0.85rem; color: var(--muted); }
+
+    .field { margin-bottom: 1rem; }
+    .field label {
+      display: block;
+      font-size: 0.78rem;
+      color: var(--soft);
+      margin-bottom: 0.35rem;
+      font-weight: 500;
+    }
+    .field input {
+      width: 100%;
+      background: var(--surface2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      padding: 0.55rem 0.85rem;
+      font-size: 0.875rem;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .field input:focus { border-color: var(--blue); }
+    .field input::placeholder { color: #3d4560; }
+
+    .submit-btn {
+      margin-top: 0.5rem;
+      width: 100%;
+      padding: 0.65rem;
+      border: none;
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    .submit-btn:hover:not(:disabled) { opacity: 0.88; transform: translateY(-1px); }
+    .submit-btn:active:not(:disabled) { transform: translateY(0); }
+    .submit-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+    .btn-blue  { background: #2563eb; color: #fff; }
+    .btn-green { background: #16a34a; color: #fff; }
+    .btn-red   { background: #dc2626; color: #fff; }
+
+    .result {
+      margin-top: 1rem;
+      padding: 0.85rem 1rem;
+      border-radius: 0.5rem;
+      font-size: 0.78rem;
+      font-family: 'Menlo', 'Consolas', monospace;
+      word-break: break-all;
+      white-space: pre-wrap;
+      line-height: 1.6;
+      display: none;
+    }
+    .result.success { background: #052e16; border: 1px solid #166534; color: #86efac; display: block; }
+    .result.error   { background: #450a0a; border: 1px solid #991b1b; color: #fca5a5; display: block; }
+
+    .spinner {
+      display: inline-block;
+      width: 14px; height: 14px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      flex-shrink: 0;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Empty state ── */
+    .empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      gap: 0.75rem;
+      color: var(--muted);
+      width: 100%;
+    }
+    .empty-icon { font-size: 3rem; opacity: 0.3; }
+    .empty p { font-size: 0.875rem; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo">ICOToken <span>Admin</span></div>
+    <div class="spacer"></div>
+    <div class="net-pill">
+      <div class="dot" id="net-dot"></div>
+      <select id="network" onchange="updateNetworkUI()">
+        <option value="sepolia">Sepolia</option>
+        <option value="mainnet">Mainnet</option>
+      </select>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside>
+      <div class="nav-label">Actions</div>
+
+      <button class="nav-btn" data-panel="deploy" onclick="show('deploy')">
+        <span class="nav-icon">🚀</span>
+        Deploy
+        <span class="nav-badge badge-blue">New</span>
+      </button>
+
+      <button class="nav-btn" data-panel="mint" onclick="show('mint')">
+        <span class="nav-icon">⬆︎</span>
+        Mint
+        <span class="nav-badge badge-green">Supply</span>
+      </button>
+
+      <button class="nav-btn" data-panel="burn" onclick="show('burn')">
+        <span class="nav-icon">🔥</span>
+        Burn
+        <span class="nav-badge badge-red">Destroy</span>
+      </button>
+
+      <div class="nav-divider"></div>
+
+      <div class="hint">
+        Each action requires Trezor confirmation before the transaction is broadcast.
+      </div>
+    </aside>
+
+    <main id="main-area">
+
+      <!-- Empty state -->
+      <div class="empty" id="empty-state">
+        <div class="empty-icon">⬅</div>
+        <p>Select an action from the sidebar</p>
+      </div>
+
+      <!-- Deploy -->
+      <div class="panel" id="panel-deploy">
+        <div class="panel-header">
+          <h2>🚀 Deploy contract</h2>
+          <p>Deploys a new ICOToken to the selected network. You will be prompted to confirm on your Trezor.</p>
+        </div>
+        <form id="form-deploy" onsubmit="handle(event, 'deploy')">
+          <div class="field">
+            <label>Token name</label>
+            <input name="name" placeholder="e.g. KARN Token" required />
+          </div>
+          <div class="field">
+            <label>Symbol</label>
+            <input name="symbol" placeholder="e.g. KARN" required />
+          </div>
+          <div class="field">
+            <label>Max supply (whole tokens)</label>
+            <input name="maxSupply" type="number" min="1" placeholder="e.g. 1000000" required />
+          </div>
+          <button type="submit" class="submit-btn btn-blue">Deploy</button>
+        </form>
+        <div class="result" id="result-deploy"></div>
+      </div>
+
+      <!-- Mint -->
+      <div class="panel" id="panel-mint">
+        <div class="panel-header">
+          <h2>⬆︎ Mint tokens</h2>
+          <p>Mints new tokens to any address. Requires <code>MINTER_ROLE</code>. Amount is in whole tokens (18 decimals applied automatically).</p>
+        </div>
+        <form id="form-mint" onsubmit="handle(event, 'mint')">
+          <div class="field">
+            <label>Recipient address</label>
+            <input name="to" placeholder="0x…" pattern="0x[a-fA-F0-9]{40}" required />
+          </div>
+          <div class="field">
+            <label>Amount (whole tokens)</label>
+            <input name="amount" type="number" min="1" placeholder="e.g. 10000" required />
+          </div>
+          <button type="submit" class="submit-btn btn-green">Mint</button>
+        </form>
+        <div class="result" id="result-mint"></div>
+      </div>
+
+      <!-- Burn -->
+      <div class="panel" id="panel-burn">
+        <div class="panel-header">
+          <h2>🔥 Burn tokens</h2>
+          <p>Burns tokens held by the token contract address itself. Requires <code>BURNABLE_ROLE</code>. Amount is in whole tokens.</p>
+        </div>
+        <form id="form-burn" onsubmit="handle(event, 'burn')">
+          <div class="field">
+            <label>Amount (whole tokens)</label>
+            <input name="amount" type="number" min="1" placeholder="e.g. 5000" required />
+          </div>
+          <button type="submit" class="submit-btn btn-red">Burn</button>
+        </form>
+        <div class="result" id="result-burn"></div>
+      </div>
+
+    </main>
+  </div>
+
+  <script>
+    const API = 'https://localhost'
+
+    function updateNetworkUI() {
+      const net = document.getElementById('network').value
+      document.getElementById('net-dot').className = net === 'mainnet' ? 'dot mainnet' : 'dot'
+    }
+
+    function getNetwork() {
+      return document.getElementById('network').value
+    }
+
+    function show(name) {
+      document.getElementById('empty-state').style.display = 'none'
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'))
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'))
+      document.getElementById('panel-' + name).classList.add('active')
+      document.querySelector(`[data-panel="${name}"]`).classList.add('active')
+    }
+
+    function showResult(id, ok, data) {
+      const el = document.getElementById('result-' + id)
+      el.className = 'result ' + (ok ? 'success' : 'error')
+      el.textContent = ok
+        ? JSON.stringify(data, null, 2)
+        : (data.message || data.error || JSON.stringify(data, null, 2))
+    }
+
+    function setLoading(btn, loading, label) {
+      if (loading) {
+        btn.disabled = true
+        btn.dataset.orig = btn.textContent
+        btn.innerHTML = '<span class="spinner"></span>Waiting for Trezor…'
+      } else {
+        btn.disabled = false
+        btn.textContent = btn.dataset.orig || label
+      }
+    }
+
+    async function post(path, body) {
+      const res = await fetch(API + path, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...body, network: getNetwork() }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw json
+      return json
+    }
+
+    async function handle(e, action) {
+      e.preventDefault()
+      const btn = e.target.querySelector('button[type="submit"]')
+      const fd = new FormData(e.target)
+      const body = Object.fromEntries(fd)
+
+      setLoading(btn, true)
+      try {
+        let data
+        if (action === 'deploy') {
+          data = await post('/deploy', body)
+        } else if (action === 'mint') {
+          data = await post('/mint', body)
+        } else if (action === 'burn') {
+          data = await post('/burn', { amount: body.amount })
+        }
+        showResult(action, true, data)
+      } catch (err) {
+        showResult(action, false, err)
+      } finally {
+        setLoading(btn, false)
+      }
+    }
+  </script>
+</body>
+</html>
