@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import yaml from 'js-yaml'
 import Fastify from 'fastify'
 import cors from '@fastify/cors'
 import staticFiles from '@fastify/static'
@@ -22,6 +23,11 @@ await app.register(cors, { origin: true })
 await app.register(staticFiles, {
   root: join(__dirname, '../public'),
   prefix: '/',
+})
+
+app.get('/config', async (_req, reply) => {
+  const raw = readFileSync(resolve(__dirname, '../scripts/config.yaml'), 'utf8')
+  return reply.send(yaml.load(raw))
 })
 
 app.post('/deploy', async (req, reply) => {

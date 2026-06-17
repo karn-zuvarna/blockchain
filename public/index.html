@@ -207,6 +207,27 @@
     .field input:focus { border-color: var(--blue); }
     .field input::placeholder { color: #3d4560; }
 
+    .field select {
+      width: 100%;
+      background: var(--surface2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      padding: 0.55rem 0.85rem;
+      font-size: 0.875rem;
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.15s;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.75rem center;
+      padding-right: 2rem;
+    }
+    .field select:focus { border-color: var(--blue); }
+    .field select option { background: var(--surface2); color: var(--text); }
+    .field select option.option-custom { color: var(--muted); font-style: italic; }
+
     .submit-btn {
       margin-top: 0.5rem;
       width: 100%;
@@ -353,7 +374,13 @@
         <form id="form-mint" onsubmit="handle(event, 'mint')">
           <div class="field">
             <label>Recipient address</label>
-            <input name="to" placeholder="0x…" pattern="0x[a-fA-F0-9]{40}" required />
+            <select id="mint-to" onchange="onRecipientChange()">
+              <option value="" disabled selected>Select address…</option>
+            </select>
+          </div>
+          <div class="field" id="custom-to-field" style="display:none">
+            <label>Custom address</label>
+            <input id="custom-to-input" placeholder="0x…" pattern="0x[a-fA-F0-9]{40}" />
           </div>
           <div class="field">
             <label>Amount (whole tokens)</label>
@@ -385,6 +412,76 @@
 
   <script>
     const API = 'https://localhost'
+
+    // ── Recipient list ─────────────────────────────────
+    let recipients = []
+
+    function addRecipient(address) {
+      if (!address || !/^0x[a-fA-F0-9]{40}$/i.test(address)) return
+      recipients = [address, ...recipients.filter(a => a.toLowerCase() !== address.toLowerCase())]
+      renderRecipients(address)
+    }
+
+    function renderRecipients(selectValue) {
+      const sel = document.getElementById('mint-to')
+      const current = selectValue ?? sel.value
+      sel.innerHTML = ''
+
+      recipients.forEach((addr, i) => {
+        const opt = document.createElement('option')
+        opt.value = addr
+        opt.textContent = i === 0
+          ? `${addr}  ← latest`
+          : addr
+        sel.appendChild(opt)
+      })
+
+      const custom = document.createElement('option')
+      custom.value = '__custom__'
+      custom.textContent = 'Enter custom address…'
+      custom.className = 'option-custom'
+      sel.appendChild(custom)
+
+      if (current) sel.value = current
+    }
+
+    function onRecipientChange() {
+      const isCustom = document.getElementById('mint-to').value === '__custom__'
+      document.getElementById('custom-to-field').style.display = isCustom ? 'block' : 'none'
+    }
+
+    function getMintTo() {
+      const sel = document.getElementById('mint-to')
+      if (sel.value === '__custom__') return document.getElementById('custom-to-input').value.trim()
+      return sel.value
+    }
+
+    // ── Config ─────────────────────────────────────────
+    async function loadConfig() {
+      try {
+        const res = await fetch(API + '/config')
+        if (!res.ok) return
+        const cfg = await res.json()
+
+        // Deploy
+        setField('form-deploy', 'name',      cfg.token?.name)
+        setField('form-deploy', 'symbol',    cfg.token?.symbol)
+        setField('form-deploy', 'maxSupply', cfg.token?.maxSupply)
+
+        // Mint — seed recipient dropdown from config
+        if (cfg.mint?.to) addRecipient(cfg.mint.to)
+
+        // Mint amount + burn amount
+        setField('form-mint', 'amount', cfg.mint?.amount)
+        setField('form-burn', 'amount', cfg.burn?.amount)
+      } catch (_) {}
+    }
+
+    function setField(formId, name, value) {
+      if (value == null || value === '') return
+      const el = document.querySelector(`#${formId} [name="${name}"]`)
+      if (el) el.value = value
+    }
 
     function updateNetworkUI() {
       const net = document.getElementById('network').value
@@ -433,6 +530,8 @@
       return json
     }
 
+    loadConfig()
+
     async function handle(e, action) {
       e.preventDefault()
       const btn = e.target.querySelector('button[type="submit"]')
@@ -444,8 +543,11 @@
         let data
         if (action === 'deploy') {
           data = await post('/deploy', body)
+          if (data.contractAddress) addRecipient(data.contractAddress)
         } else if (action === 'mint') {
-          data = await post('/mint', body)
+          const to = getMintTo()
+          if (!to) { showResult('mint', false, { message: 'Select or enter a recipient address' }); return }
+          data = await post('/mint', { to, amount: body.amount })
         } else if (action === 'burn') {
           data = await post('/burn', { amount: body.amount })
         }
