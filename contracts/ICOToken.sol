@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.24;
+pragma solidity 0.8.35;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
@@ -13,7 +13,7 @@ contract ICOToken is ERC20, AccessControl {
     error NonTransferable();
     error MaxSupplyExceeded(uint256 requested, uint256 available);
 
-    constructor(string memory name, string memory symbol, uint256 _maxSupply) ERC20(name, symbol) {
+    constructor(string memory _name, string memory _symbol, uint256 _maxSupply) ERC20(_name, _symbol) {
         maxSupply = _maxSupply;
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(MINTER_ROLE, msg.sender);
@@ -40,7 +40,7 @@ contract ICOToken is ERC20, AccessControl {
         address account,
         uint256 amount
     ) external onlyRole(BURNABLE_ROLE) {
-        if (balanceOf(account) < amount) revert("ERC20: insufficient balance");
+        require(account == address(this), "can only burn from token contract");
         _burn(account, amount);
     }
 }
