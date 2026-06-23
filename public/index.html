@@ -168,14 +168,17 @@
       padding: 2rem;
       overflow-y: auto;
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
+      flex-wrap: wrap;
       align-items: flex-start;
+      align-content: flex-start;
+      gap: 1.5rem;
     }
 
     .panel {
       display: none;
-      width: 100%;
-      max-width: 480px;
+      width: 480px;
+      max-width: 100%;
       animation: fadeIn 0.15s ease;
     }
     .panel.active { display: block; }
@@ -343,6 +346,15 @@
 
   <div class="layout">
     <aside>
+      <div class="nav-label">Overview</div>
+
+      <button class="nav-btn" data-panel="home" onclick="showDefault()">
+        <span class="nav-icon">🏠</span>
+        Home
+      </button>
+
+      <div class="nav-divider"></div>
+
       <div class="nav-label">Actions</div>
 
       <button class="nav-btn" data-panel="deploy" onclick="show('deploy')">
@@ -605,6 +617,17 @@
       document.querySelector(`[data-panel="${name}"]`).classList.add('active')
     }
 
+    // Default landing view: Deploy (left) + Mint (right) side by side
+    function showDefault() {
+      document.getElementById('empty-state').style.display = 'none'
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'))
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'))
+      for (const name of ['deploy', 'mint']) {
+        document.getElementById('panel-' + name).classList.add('active')
+      }
+      document.querySelector('[data-panel="home"]').classList.add('active')
+    }
+
     function showResult(id, ok, data) {
       const el = document.getElementById('result-' + id)
       el.className = 'result ' + (ok ? 'success' : 'error')
@@ -637,6 +660,7 @@
 
     document.getElementById('copy-year').textContent = new Date().getFullYear()
     loadConfig()
+    showDefault()
 
     async function handle(e, action) {
       e.preventDefault()
