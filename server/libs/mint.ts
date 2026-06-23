@@ -3,8 +3,9 @@ import { env } from './env.ts'
 import { parseNetwork, getNetworkConfig, type NetworkName } from './network.ts'
 import { createViemPublicClient, trezorSignAndSend } from './trezor.ts'
 
-export async function mint(_to: string, _amount: string, network: NetworkName = parseNetwork()) {
-  const { chain, rpcUrl, tokenAddress } = getNetworkConfig(network)
+export async function mint(_to: string, _amount: string, network: NetworkName = parseNetwork(), _tokenAddress?: string) {
+  const { chain, rpcUrl, tokenAddress: defaultTokenAddress } = getNetworkConfig(network)
+  const tokenAddress = (_tokenAddress as `0x${string}`) || defaultTokenAddress
   const to = (_to || env.TREZOR_ADDRESS) as `0x${string}`
   const amount = parseUnits(_amount, 18)
   const abi = parseAbi(['function mint(address,uint256)'])

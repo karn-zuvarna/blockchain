@@ -151,6 +151,17 @@
       line-height: 1.5;
     }
 
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      padding: 0.6rem 1.5rem;
+      font-size: 0.7rem;
+      color: var(--muted);
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
     /* ── Main panel ── */
     main {
       flex: 1;
@@ -275,6 +286,32 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
+    /* ── Token info panel ── */
+    .token-info {
+      margin-top: -0.5rem;
+      margin-bottom: 1rem;
+      padding: 0.6rem 0.85rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      display: grid;
+      grid-template-columns: 6rem 1fr;
+      gap: 0.3rem 0.5rem;
+    }
+    .ti-label {
+      font-size: 0.72rem;
+      color: var(--muted);
+      font-weight: 500;
+      line-height: 1.6;
+    }
+    .ti-value {
+      font-size: 0.72rem;
+      color: var(--soft);
+      font-family: 'Menlo', 'Consolas', monospace;
+      line-height: 1.6;
+      word-break: break-all;
+    }
+
     /* ── Empty state ── */
     .empty {
       display: flex;
@@ -373,14 +410,21 @@
         </div>
         <form id="form-mint" onsubmit="handle(event, 'mint')">
           <div class="field">
-            <label>Recipient address</label>
-            <select id="mint-to" onchange="onRecipientChange()">
-              <option value="" disabled selected>Select address…</option>
-            </select>
+            <label>Token Contract Address</label>
+            <select id="mint-token-address" onchange="onTokenSelect('mint-token-address')"></select>
           </div>
-          <div class="field" id="custom-to-field" style="display:none">
-            <label>Custom address</label>
-            <input id="custom-to-input" placeholder="0x…" pattern="0x[a-fA-F0-9]{40}" />
+          <div class="field" id="mint-custom-token-field" style="display:none">
+            <label>Custom contract address</label>
+            <input id="mint-custom-token-input" placeholder="0x…" pattern="0x[a-fA-F0-9]{40}" />
+          </div>
+          <div class="token-info">
+            <span class="ti-label">Name</span>    <span class="ti-value" id="mint-ti-name">—</span>
+            <span class="ti-label">Symbol</span>  <span class="ti-value" id="mint-ti-symbol">—</span>
+            <span class="ti-label">Created at</span><span class="ti-value" id="mint-ti-date">—</span>
+          </div>
+          <div class="field">
+            <label>Mint wallet address</label>
+            <input id="mint-to" placeholder="0x…" pattern="0x[a-fA-F0-9]{40}" />
           </div>
           <div class="field">
             <label>Amount (whole tokens)</label>
@@ -395,9 +439,26 @@
       <div class="panel" id="panel-burn">
         <div class="panel-header">
           <h2>🔥 Burn tokens</h2>
-          <p>Burns tokens held by the token contract address itself. Requires <code>BURNABLE_ROLE</code>. Amount is in whole tokens.</p>
+          <p>Burns tokens from the burn wallet address. Requires <code>BURNABLE_ROLE</code>. Amount is in whole tokens.</p>
         </div>
         <form id="form-burn" onsubmit="handle(event, 'burn')">
+          <div class="field">
+            <label>Token Contract Address</label>
+            <select id="burn-token-address" onchange="onTokenSelect('burn-token-address')"></select>
+          </div>
+          <div class="field" id="burn-custom-token-field" style="display:none">
+            <label>Custom contract address</label>
+            <input id="burn-custom-token-input" placeholder="0x…" pattern="0x[a-fA-F0-9]{40}" />
+          </div>
+          <div class="token-info">
+            <span class="ti-label">Name</span>    <span class="ti-value" id="burn-ti-name">—</span>
+            <span class="ti-label">Symbol</span>  <span class="ti-value" id="burn-ti-symbol">—</span>
+            <span class="ti-label">Created at</span><span class="ti-value" id="burn-ti-date">—</span>
+          </div>
+          <div class="field">
+            <label>Burn wallet address</label>
+            <input id="burn-wallet-address" placeholder="0x…" pattern="0x[a-fA-F0-9]{40}" />
+          </div>
           <div class="field">
             <label>Amount (whole tokens)</label>
             <input name="amount" type="number" min="1" placeholder="e.g. 5000" required />
@@ -410,50 +471,85 @@
     </main>
   </div>
 
+  <footer>
+    &copy; <span id="copy-year"></span> COVENAN. All rights reserved.
+  </footer>
+
   <script>
     const API = 'https://localhost'
 
-    // ── Recipient list ─────────────────────────────────
-    let recipients = []
+    // ── Token contract dropdown ────────────────────────
+    let tokenContracts = []
 
-    function addRecipient(address) {
-      if (!address || !/^0x[a-fA-F0-9]{40}$/i.test(address)) return
-      recipients = [address, ...recipients.filter(a => a.toLowerCase() !== address.toLowerCase())]
-      renderRecipients(address)
+    function populateTokenDropdowns(cfg) {
+      tokenContracts = []
+      const name   = cfg.token?.name   || 'Unknown'
+      const symbol = cfg.token?.symbol || '?'
+
+      const push = (network, address, deployedAt) => {
+        if (!address) return
+        tokenContracts.push({ network, address, name, symbol, deployedAt: deployedAt || '', label: address })
+      }
+      push('sepolia', cfg.sepoliaTokenAddress, cfg.sepoliaDeployedAt)
+      push('mainnet', cfg.mainnetTokenAddress, cfg.mainnetDeployedAt)
+
+      syncTokenDropdowns()
     }
 
-    function renderRecipients(selectValue) {
-      const sel = document.getElementById('mint-to')
-      const current = selectValue ?? sel.value
-      sel.innerHTML = ''
+    const CUSTOM_TOKEN = '__custom__'
 
-      recipients.forEach((addr, i) => {
-        const opt = document.createElement('option')
-        opt.value = addr
-        opt.textContent = i === 0
-          ? `${addr}  ← latest`
-          : addr
-        sel.appendChild(opt)
-      })
-
-      const custom = document.createElement('option')
-      custom.value = '__custom__'
-      custom.textContent = 'Enter custom address…'
-      custom.className = 'option-custom'
-      sel.appendChild(custom)
-
-      if (current) sel.value = current
+    function onTokenSelect(selId) {
+      const sel    = document.getElementById(selId)
+      const prefix = selId.startsWith('mint') ? 'mint' : 'burn'
+      const isCustom = sel.value === CUSTOM_TOKEN
+      document.getElementById(`${prefix}-custom-token-field`).style.display = isCustom ? 'block' : 'none'
+      const tc = isCustom ? null : tokenContracts.find(t => t.address === sel.value)
+      document.getElementById(`${prefix}-ti-name`).textContent   = tc?.name       || '—'
+      document.getElementById(`${prefix}-ti-symbol`).textContent = tc?.symbol     || '—'
+      document.getElementById(`${prefix}-ti-date`).textContent   = tc?.deployedAt || '—'
     }
 
-    function onRecipientChange() {
-      const isCustom = document.getElementById('mint-to').value === '__custom__'
-      document.getElementById('custom-to-field').style.display = isCustom ? 'block' : 'none'
-    }
-
-    function getMintTo() {
-      const sel = document.getElementById('mint-to')
-      if (sel.value === '__custom__') return document.getElementById('custom-to-input').value.trim()
+    function getTokenAddress(prefix) {
+      const sel = document.getElementById(`${prefix}-token-address`)
+      if (sel.value === CUSTOM_TOKEN) return document.getElementById(`${prefix}-custom-token-input`).value.trim()
       return sel.value
+    }
+
+    function syncTokenDropdowns() {
+      const net      = getNetwork()
+      const filtered = tokenContracts.filter(t => t.network === net)
+      for (const selId of ['mint-token-address', 'burn-token-address']) {
+        const sel    = document.getElementById(selId)
+        const prefix = selId.startsWith('mint') ? 'mint' : 'burn'
+        if (!sel) continue
+        sel.innerHTML = ''
+        filtered.forEach(tc => {
+          const opt = document.createElement('option')
+          opt.value = tc.address
+          opt.textContent = tc.label
+          sel.appendChild(opt)
+        })
+        const customOpt = document.createElement('option')
+        customOpt.value = CUSTOM_TOKEN
+        customOpt.textContent = 'Enter custom address…'
+        customOpt.className = 'option-custom'
+        sel.appendChild(customOpt)
+        document.getElementById(`${prefix}-custom-token-field`).style.display = 'none'
+        if (filtered.length > 0) {
+          sel.value = filtered[0].address
+          onTokenSelect(selId)
+        }
+      }
+    }
+
+    function addDeployedToken(address, name, symbol) {
+      const net   = getNetwork()
+      const today = new Date().toISOString().slice(0, 10)
+      const idx   = tokenContracts.findIndex(t => t.network === net)
+      const tc    = { network: net, address, name, symbol, deployedAt: today, label: address }
+      if (idx !== -1) tokenContracts[idx] = tc
+      else tokenContracts.push(tc)
+      syncTokenDropdowns()
     }
 
     // ── Config ─────────────────────────────────────────
@@ -468,10 +564,18 @@
         setField('form-deploy', 'symbol',    cfg.token?.symbol)
         setField('form-deploy', 'maxSupply', cfg.token?.maxSupply)
 
-        // Mint — seed recipient dropdown from config
-        if (cfg.mint?.to) addRecipient(cfg.mint.to)
+        // Token contract dropdowns
+        populateTokenDropdowns(cfg)
 
-        // Mint amount + burn amount
+        // Mint wallet address — default to TREZOR_ADDRESS
+        const mintToEl = document.getElementById('mint-to')
+        if (mintToEl && cfg.trezorAddress) mintToEl.value = cfg.trezorAddress
+
+        // Burn wallet address — default to burn.from or TREZOR_ADDRESS
+        const burnWalletEl = document.getElementById('burn-wallet-address')
+        if (burnWalletEl) burnWalletEl.value = cfg.burn?.from || cfg.trezorAddress || ''
+
+        // Amounts
         setField('form-mint', 'amount', cfg.mint?.amount)
         setField('form-burn', 'amount', cfg.burn?.amount)
       } catch (_) {}
@@ -486,6 +590,7 @@
     function updateNetworkUI() {
       const net = document.getElementById('network').value
       document.getElementById('net-dot').className = net === 'mainnet' ? 'dot mainnet' : 'dot'
+      syncTokenDropdowns()
     }
 
     function getNetwork() {
@@ -530,6 +635,7 @@
       return json
     }
 
+    document.getElementById('copy-year').textContent = new Date().getFullYear()
     loadConfig()
 
     async function handle(e, action) {
@@ -543,13 +649,16 @@
         let data
         if (action === 'deploy') {
           data = await post('/deploy', body)
-          if (data.contractAddress) addRecipient(data.contractAddress)
+          if (data.contractAddress) addDeployedToken(data.contractAddress, body.name, body.symbol)
         } else if (action === 'mint') {
-          const to = getMintTo()
-          if (!to) { showResult('mint', false, { message: 'Select or enter a recipient address' }); return }
-          data = await post('/mint', { to, amount: body.amount })
+          const to = document.getElementById('mint-to').value.trim()
+          if (!to) { showResult('mint', false, { message: 'Enter a mint wallet address' }); return }
+          const tokenAddress = getTokenAddress('mint')
+          data = await post('/mint', { to, amount: body.amount, tokenAddress })
         } else if (action === 'burn') {
-          data = await post('/burn', { amount: body.amount })
+          const tokenAddress      = getTokenAddress('burn')
+          const burnWalletAddress = document.getElementById('burn-wallet-address').value.trim()
+          data = await post('/burn', { amount: body.amount, tokenAddress, burnWalletAddress })
         }
         showResult(action, true, data)
       } catch (err) {

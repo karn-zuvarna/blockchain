@@ -27,7 +27,15 @@ await app.register(staticFiles, {
 
 app.get('/config', async (_req, reply) => {
   const raw = readFileSync(resolve(__dirname, '../scripts/config.yaml'), 'utf8')
-  return reply.send(yaml.load(raw))
+  const cfg = yaml.load(raw) as Record<string, any>
+  return reply.send({
+    ...cfg,
+    trezorAddress: env.TREZOR_ADDRESS,
+    sepoliaTokenAddress: env.SEPOLIA_TOKEN_ADDRESS,
+    sepoliaDeployedAt: cfg.deployedAt?.sepolia || '',
+    mainnetTokenAddress: env.MAINNET_TOKEN_ADDRESS,
+    mainnetDeployedAt: cfg.deployedAt?.mainnet || '',
+  })
 })
 
 app.post('/deploy', async (req, reply) => {
@@ -37,14 +45,14 @@ app.post('/deploy', async (req, reply) => {
 })
 
 app.post('/mint', async (req, reply) => {
-  const { to, amount, network } = req.body as { to: string; amount: string; network?: string }
-  const result = await mint(to, amount, network as any)
+  const { to, amount, network, tokenAddress } = req.body as { to: string; amount: string; network?: string; tokenAddress?: string }
+  const result = await mint(to, amount, network as any, tokenAddress)
   return reply.code(201).send({ to, amount, network, txHash: result.transactionHash })
 })
 
 app.post('/burn', async (req, reply) => {
-  const { amount, network } = req.body as { amount: string; network?: string }
-  const result = await burn(amount, network as any)
+  const { amount, network, tokenAddress, burnWalletAddress } = req.body as { amount: string; network?: string; tokenAddress?: string; burnWalletAddress?: string }
+  const result = await burn(amount, network as any, tokenAddress, burnWalletAddress)
   return reply.code(201).send({ amount, network, txHash: result.transactionHash })
 })
 
