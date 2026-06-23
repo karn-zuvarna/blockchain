@@ -9,3 +9,6 @@ burn:
   contractAddress: '0x4c117b3e855a555db9eac9ffff2768db5151960b'
   from: ''
   amount: 35000
+deployedAt:
+  sepolia: ''
+  mainnet: '2026-06-12'

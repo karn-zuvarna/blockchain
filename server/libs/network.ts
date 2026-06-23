@@ -25,8 +25,8 @@ export function getNetworkConfig(network: NetworkName) {
   }
   return {
     chain: { ...sepolia, id: env.CHAIN_ID },
-    rpcUrl: env.RPC_URL,
-    tokenAddress: env.TOKEN_ADDRESS as `0x${string}`,
+    rpcUrl: env.SEPOLIA_RPC_URL,
+    tokenAddress: env.SEPOLIA_TOKEN_ADDRESS as `0x${string}`,
     isMainnet: false,
   }
 }
@@ -43,8 +43,8 @@ export function getDeployNetworkConfig(network: NetworkName) {
   }
   return {
     chain: { ...sepolia, id: env.CHAIN_ID },
-    rpcUrl: env.RPC_URL,
+    rpcUrl: env.SEPOLIA_RPC_URL,
     isMainnet: false,
-    envKey: 'TOKEN_ADDRESS' as const,
+    envKey: 'SEPOLIA_TOKEN_ADDRESS' as const,
   }
 }

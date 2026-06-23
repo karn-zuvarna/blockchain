@@ -1,0 +1,73 @@
+npx ts-node server/routes/mint.ts
+[dotenv@17.2.3] injecting env (8) from .env -- tip: ⚙️  specify custom .env file path with { path: '/custom/path/.env' }
+file:///Users/karnake/sourceCodes/ethereum/blockchain/node_modules/viem/utils/errors/getTransactionError.ts:44
+  return new TransactionExecutionError(cause, {
+         ^
+TransactionExecutionError: The method "eth_sendTransaction" does not exist / is not available.
+
+URL: https://sepolia.infura.io/v3/73f3f4a476854251a133545ed6a681c2
+Request body: {"method":"eth_sendTransaction","params":[{"data":"0x608060405234801561000f575f5ffd5b5060405180.............","from":"0xfdaf48a600f39a8a1f84cc3d62e203b3c7bca17c"}]}
+ 
+Request Arguments:
+  from:  0xfdaf48a600f39a8a1f84cc3d62e203b3c7bca17c
+  data:  0x608060405234801561000f575f5ffd5b5060405180.............
+
+Details: The method eth_sendTransaction does not exist/is not available
+Version: viem@2.38.3
+    at getTransactionError (file:///Users/karnake/sourceCodes/ethereum/blockchain/node_modules/viem/utils/errors/getTransactionError.ts:44:10)
+    at sendTransaction (file:///Users/karnake/sourceCodes/ethereum/blockchain/node_modules/viem/actions/wallet/sendTransaction.ts:355:11)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///Users/karnake/sourceCodes/ethereum/blockchain/server/routes/mint.ts:26:24 {
+  cause: MethodNotFoundRpcError: The method "eth_sendTransaction" does not exist / is not available.
+  
+  URL: https://sepolia.infura.io/v3/73f3f4a476854251a133545ed6a681c2
+  Request body: {"method":"eth_sendTransaction","params":[{"data":"0x608060405234801561000f575f5ffd5b5060405180.............","from":"0xfdaf48a600f39a8a1f84cc3d62e203b3c7bca17c"}]}
+  
+  Details: The method eth_sendTransaction does not exist/is not available
+  Version: viem@2.38.3
+      at withRetry.delay.count.count (file:///Users/karnake/sourceCodes/ethereum/blockchain/node_modules/viem/utils/buildRequest.ts:164:25)
+      at processTicksAndRejections (node:internal/process/task_queues:105:5)
+      at async attemptRetry (file:///Users/karnake/sourceCodes/ethereum/blockchain/node_modules/viem/utils/promise/withRetry.ts:44:22) {
+    details: 'The method eth_sendTransaction does not exist/is not available',
+    docsPath: undefined,
+    metaMessages: [
+      'URL: https://sepolia.infura.io/v3/73f3f4a476854251a133545ed6a681c2',
+      'Request body: {"method":"eth_sendTransaction","params":[{"data":"0x608060405234801561000f575f5ffd5b5060405180.............'... 4287 more characters
+    ],
+    shortMessage: 'The method "eth_sendTransaction" does not exist / is not available.',
+    version: '2.38.3',
+    code: -32601,
+    [cause]: RpcRequestError: RPC Request failed.
+    
+    URL: https://sepolia.infura.io/v3/73f3f4a476854251a133545ed6a681c2
+    Request body: {"method":"eth_sendTransaction","params":[{"data":"0x608060405234801561000f575f5ffd5b5060405180.............","from":"0xfdaf48a600f39a8a1f84cc3d62e203b3c7bca17c"}]}
+    
+    Details: The method eth_sendTransaction does not exist/is not available
+    Version: viem@2.38.3
+        at request (file:///Users/karnake/sourceCodes/ethereum/blockchain/node_modules/viem/clients/transports/http.ts:157:19)
+        at processTicksAndRejections (node:internal/process/task_queues:105:5)
+        at async withRetry.delay.count.count (file:///Users/karnake/sourceCodes/ethereum/blockchain/node_modules/viem/utils/buildRequest.ts:150:22)
+        at async attemptRetry (file:///Users/karnake/sourceCodes/ethereum/blockchain/node_modules/viem/utils/promise/withRetry.ts:44:22) {
+      details: 'The method eth_sendTransaction does not exist/is not available',
+      docsPath: undefined,
+      metaMessages: [Array],
+      shortMessage: 'RPC Request failed.',
+      version: '2.38.3',
+      code: -32601,
+      data: undefined,
+      [cause]: [Object]
+    }
+  },
+  details: 'The method eth_sendTransaction does not exist/is not available',
+  docsPath: undefined,
+  metaMessages: [
+    'URL: https://sepolia.infura.io/v3/73f3f4a476854251a133545ed6a681c2',
+    'Request body: {"method":"eth_sendTransaction","params":[{"data":"0x608060405234801561000f575f5ffd5b5060405180.............'... 4287 more characters,
+    ' ',
+    'Request Arguments:',
+    '  from:  0xfdaf48a600f39a8a1f84cc3d62e203b3c7bca17c\n' +
+      '  data:  0x608060405234801561000f575f5ffd5b5060405180.............'... 4227 more characters
+  ],
+  shortMessage: 'The method "eth_sendTransaction" does not exist / is not available.',
+  version: '2.38.3'
+}
